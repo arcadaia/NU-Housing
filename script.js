@@ -16,6 +16,13 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19
 }).addTo(map);
 
+const purpleIcon = L.icon({
+  iconUrl: "./assets/map_marker.png",
+  iconSize: [32, 42],      // adjust if needed
+  iconAnchor: [16, 42],    // bottom center of marker
+  popupAnchor: [0, -40]
+});
+
 // Campus marker
 L.circleMarker([NU.lat, NU.lng], { radius: 6 }).addTo(map);
 
@@ -116,7 +123,7 @@ fetch("./apartments.json")
       apt.lat = lat;
       apt.lng = lng;
 
-      const marker = L.marker([lat, lng]).addTo(map);
+      const marker = L.marker([lat, lng], { icon: purpleIcon }).addTo(map);
       bounds.push([lat, lng]);
 
       marker.on("click", () => openPanel(apt));
