@@ -3,6 +3,13 @@ const NU = { name: "Northwestern (Evanston)", lat: 42.055984, lng: -87.675171 };
 
 // Create map
 const map = L.map("map").setView([NU.lat, NU.lng], 14);
+map.on("click", (e) => {
+  const { lat, lng } = e.latlng;
+  L.popup()
+    .setLatLng(e.latlng)
+    .setContent(`<b>Coordinates</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br><span style="opacity:0.7">Copy into apartments.json</span>`)
+    .openOn(map);
+});
 
 // Base tiles (free)
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
