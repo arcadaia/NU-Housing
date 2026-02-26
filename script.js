@@ -79,7 +79,6 @@ function closePanel() {
 
 // Close handlers
 panelClose.addEventListener("click", closePanel);
-backdrop.addEventListener("click", closePanel);
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closePanel();
 });
