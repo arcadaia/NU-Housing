@@ -1,66 +1,75 @@
 :root{
-  --bg: #0b1020;
-  --panel: #ffffff;
-  --muted: rgba(0,0,0,0.65);
   --border: rgba(0,0,0,0.10);
-  --shadow: 0 20px 60px rgba(0,0,0,0.25);
+  --shadow: 0 24px 80px rgba(0,0,0,0.30);
   --radius: 18px;
   --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  --muted: rgba(0,0,0,0.65);
 }
 
 html, body, #map { height: 100%; margin: 0; font-family: var(--font); }
 
-.map-header{
+/* Centered header that won't collide with zoom controls */
+.topbar{
   position: fixed;
   top: 14px;
-  left: 14px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 800;
+  pointer-events: none; /* lets you click map behind it */
+}
+
+.topbar-inner{
+  pointer-events: auto;
   background: rgba(255,255,255,0.94);
   border: 1px solid var(--border);
   backdrop-filter: blur(10px);
-  padding: 12px 14px;
   border-radius: 14px;
   box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+  padding: 12px 14px;
+  text-align: center;
+  min-width: 260px;
 }
-.map-title{
-  font-weight: 900;
+
+.title{
+  font-weight: 950;
   font-size: 16px;
   line-height: 1.1;
 }
-.map-subtitle{
+.subtitle{
   margin-top: 4px;
   font-size: 12px;
-  color: rgba(0,0,0,0.6);
+  color: var(--muted);
 }
 
-.backdrop{
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.35);
+/* Modal backdrop */
+.modal-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.40);
   z-index: 900;
 }
-.hidden{ display:none; }
 
-/* Half-screen panel */
-.panel{
+.hidden{ display: none; }
+
+/* Floating modal (big, centered) */
+.modal{
   position: fixed;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: min(50vw, 720px);
-  min-width: 420px;
-  background: var(--panel);
   z-index: 1000;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(920px, 92vw);
+  max-height: min(720px, 84vh);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
-  border-left: 1px solid var(--border);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-@media (max-width: 900px){
-  .panel{ width: 92vw; min-width: unset; }
-}
-
-.panel-header{
+.modal-header{
   padding: 18px 18px 14px 18px;
   border-bottom: 1px solid var(--border);
   display:flex;
@@ -69,26 +78,39 @@ html, body, #map { height: 100%; margin: 0; font-family: var(--font); }
   gap: 12px;
 }
 
-.panel-title{ font-size: 20px; font-weight: 950; line-height: 1.15; }
-.panel-address{ margin-top: 6px; color: var(--muted); font-size: 13px; line-height: 1.25; }
+.modal-title{
+  font-size: 22px;
+  font-weight: 950;
+  line-height: 1.15;
+}
+.modal-address{
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
 
-.panel-close{
+.modal-close{
   border: 1px solid var(--border);
   background: #fff;
   border-radius: 12px;
   cursor: pointer;
-  width: 40px;
-  height: 40px;
-  font-size: 24px;
+  width: 42px;
+  height: 42px;
+  font-size: 26px;
   line-height: 1;
   display:flex;
   align-items:center;
   justify-content:center;
 }
-.panel-close:hover{ background: rgba(0,0,0,0.04); }
+.modal-close:hover{ background: rgba(0,0,0,0.04); }
 
-.panel-body{ padding: 18px; overflow:auto; }
+.modal-body{
+  padding: 18px;
+  overflow: auto;
+}
 
+/* Zillow-ish cards */
 .card{
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -108,12 +130,12 @@ html, body, #map { height: 100%; margin: 0; font-family: var(--font); }
 
 .kv{
   display: grid;
-  grid-template-columns: 140px 1fr;
+  grid-template-columns: 150px 1fr;
   gap: 10px 14px;
   font-size: 14px;
 }
 .k{ color: rgba(0,0,0,0.55); }
-.v{ font-weight: 800; }
+.v{ font-weight: 850; }
 
 .links a{
   display:inline-block;
