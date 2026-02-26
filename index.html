@@ -12,6 +12,24 @@
 <body>
   <div id="map"></div>
 
+  <!-- Side panel -->
+  <aside id="panel" class="panel hidden" aria-hidden="true">
+    <div class="panel-header">
+      <div>
+        <div id="panelTitle" class="panel-title">Apartment</div>
+        <div id="panelAddress" class="panel-address"></div>
+      </div>
+      <button id="panelClose" class="panel-close" aria-label="Close">×</button>
+    </div>
+
+    <div class="panel-body" id="panelBody">
+      <!-- Filled by JS -->
+    </div>
+  </aside>
+
+  <!-- Dim background when panel open -->
+  <div id="backdrop" class="backdrop hidden" aria-hidden="true"></div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./script.js"></script>
 </body>
