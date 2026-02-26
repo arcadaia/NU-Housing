@@ -1,22 +1,15 @@
-// Evanston Apartment Map (Leaflet) — Zillow-style side panel + click-to-get-coordinates
-// - Click an apartment marker: opens big right-side panel, recenters/zooms map so marker is visible
-// - Click map: shows popup with lat/lng you can copy into apartments.json
-// - No tiny bindPopup for apartments (panel only)
-
+// Northwestern (Evanston campus) center point
 const NU = { name: "Northwestern (Evanston)", lat: 42.055984, lng: -87.675171 };
 
 // ===== Map init =====
-const map = L.map("map", { zoomControl: true }).setView([NU.lat, NU.lng], 14);
+const map = L.map("map").setView([NU.lat, NU.lng], 14);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
   maxZoom: 19
 }).addTo(map);
 
-// Campus marker (optional popup)
-L.circleMarker([NU.lat, NU.lng], { radius: 7 }).addTo(map);
-
-// Click map to get coordinates (helps you fix marker placement)
+// Optional: click map to get coordinates for apartments.json
 map.on("click", (e) => {
   const { lat, lng } = e.latlng;
   L.popup()
@@ -27,13 +20,16 @@ map.on("click", (e) => {
     .openOn(map);
 });
 
-// ===== Panel elements (must exist in index.html) =====
-const panel = document.getElementById("panel");
-const backdrop = document.getElementById("backdrop");
-const panelTitle = document.getElementById("panelTitle");
-const panelAddress = document.getElementById("panelAddress");
-const panelBody = document.getElementById("panelBody");
-const panelClose = document.getElementById("panelClose");
+// Campus marker (no popup/bubble)
+L.circleMarker([NU.lat, NU.lng], { radius: 7 }).addTo(map);
+
+// ===== Modal elements =====
+const modal = document.getElementById("modal");
+const modalBackdrop = document.getElementById("modalBackdrop");
+const modalTitle = document.getElementById("modalTitle");
+const modalAddress = document.getElementById("modalAddress");
+const modalBody = document.getElementById("modalBody");
+const modalClose = document.getElementById("modalClose");
 
 // ===== Helpers =====
 function milesBetween(lat1, lon1, lat2, lon2) {
@@ -53,16 +49,15 @@ function esc(s) {
   });
 }
 
-function openPanel(apt) {
+function openModal(apt) {
   const dist = milesBetween(NU.lat, NU.lng, apt.lat, apt.lng).toFixed(2);
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
     apt.address || `${apt.lat},${apt.lng}`
   )}`;
 
-  panelTitle.textContent = apt.name || "Apartment";
-  panelAddress.textContent = apt.address || "";
+  modalTitle.textContent = apt.name || "Apartment";
+  modalAddress.textContent = apt.address || "";
 
-  // Optional links
   const websiteLink = apt.website
     ? `<a href="${esc(apt.website)}" target="_blank" rel="noopener">Property site</a>`
     : "";
@@ -70,7 +65,7 @@ function openPanel(apt) {
     ? `<a href="${esc(apt.zillow)}" target="_blank" rel="noopener">Zillow</a>`
     : "";
 
-  panelBody.innerHTML = `
+  modalBody.innerHTML = `
     <div class="card">
       <div class="section-title">Overview</div>
       <div class="kv">
@@ -88,46 +83,36 @@ function openPanel(apt) {
 
     <div class="card">
       <div class="section-title">Notes</div>
-      <div class="note">${esc(apt.notes || "—")}</div>
+      <div>${esc(apt.notes || "—")}</div>
     </div>
   `;
 
-  panel.classList.remove("hidden");
-  backdrop.classList.remove("hidden");
-  panel.setAttribute("aria-hidden", "false");
-  backdrop.setAttribute("aria-hidden", "false");
+  modal.classList.remove("hidden");
+  modalBackdrop.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  modalBackdrop.setAttribute("aria-hidden", "false");
 }
 
-function closePanel() {
-  panel.classList.add("hidden");
-  backdrop.classList.add("hidden");
-  panel.setAttribute("aria-hidden", "true");
-  backdrop.setAttribute("aria-hidden", "true");
+function closeModal() {
+  modal.classList.add("hidden");
+  modalBackdrop.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+  modalBackdrop.setAttribute("aria-hidden", "true");
 }
 
-panelClose?.addEventListener("click", closePanel);
-backdrop?.addEventListener("click", closePanel);
+modalClose.addEventListener("click", closeModal);
+modalBackdrop.addEventListener("click", closeModal);
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closePanel();
+  if (e.key === "Escape") closeModal();
 });
 
-// Recenter/zoom so the marker is visible even with the right-side panel open
+// Zoom + center marker on click
 function focusMarker(lat, lng) {
   const targetZoom = 16;
-
-  // Step 1: zoom to marker
   map.setView([lat, lng], Math.max(map.getZoom(), targetZoom), { animate: true });
-
-  // Step 2: if panel open, shift view left so marker isn't hidden behind it
-  const panelIsOpen = !panel.classList.contains("hidden");
-  if (panelIsOpen) {
-    // shift about ~25% of screen width (tweak if you want more/less)
-    const shiftPx = Math.floor(window.innerWidth * 0.25);
-    setTimeout(() => map.panBy([-shiftPx, 0], { animate: true }), 250);
-  }
 }
 
-// ===== Load apartments and add markers =====
+// ===== Load apartments + markers =====
 fetch("./apartments.json")
   .then((res) => {
     if (!res.ok) throw new Error("Could not load apartments.json");
@@ -137,27 +122,27 @@ fetch("./apartments.json")
     const bounds = [[NU.lat, NU.lng]];
 
     apartments.forEach((apt) => {
-      // Guard: if lat/lng are strings, convert to numbers
       const lat = Number(apt.lat);
       const lng = Number(apt.lng);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
+      // Store numeric values back
+      apt.lat = lat;
+      apt.lng = lng;
+
       const marker = L.marker([lat, lng]).addTo(map);
 
-      // BIG PANEL behavior (no tiny Leaflet popup)
       marker.on("click", () => {
-        // ensure the object has numeric lat/lng for distance calc
-        apt.lat = lat;
-        apt.lng = lng;
+        // Close any coordinate popup that might be open
+        map.closePopup();
 
-        openPanel(apt);
         focusMarker(lat, lng);
+        openModal(apt);
       });
 
       bounds.push([lat, lng]);
     });
 
-    // Initial view: show everything (campus + all apartments)
     map.fitBounds(bounds, { padding: [40, 40] });
   })
   .catch((err) => {
