@@ -1,41 +1,30 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Evanston Apartment Map</title>
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="./style.css" />
-</head>
-
 <body>
-  <div class="map-header">
-  <div class="map-title">Evanston apartment map</div>
-  <div class="map-subtitle">Click a marker to open details</div>
-</div>
-  
   <div id="map"></div>
 
-  <!-- Side panel -->
-  <aside id="panel" class="panel hidden" aria-hidden="true">
-    <div class="panel-header">
+  <!-- Centered title -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="title">Evanston apartment map</div>
+      <div class="subtitle">Click a marker to open details</div>
+    </div>
+  </div>
+
+  <!-- Modal backdrop -->
+  <div id="modalBackdrop" class="modal-backdrop hidden" aria-hidden="true"></div>
+
+  <!-- Floating modal -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-header">
       <div>
-        <div id="panelTitle" class="panel-title">Apartment</div>
-        <div id="panelAddress" class="panel-address"></div>
+        <div id="modalTitle" class="modal-title">Apartment</div>
+        <div id="modalAddress" class="modal-address"></div>
       </div>
-      <button id="panelClose" class="panel-close" aria-label="Close">×</button>
+      <button id="modalClose" class="modal-close" aria-label="Close">×</button>
     </div>
 
-    <div class="panel-body" id="panelBody">
-      <!-- Filled by JS -->
-    </div>
-  </aside>
-
-  <!-- Dim background when panel open -->
-  <div id="backdrop" class="backdrop hidden" aria-hidden="true"></div>
+    <div id="modalBody" class="modal-body"></div>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./script.js"></script>
 </body>
-</html>
