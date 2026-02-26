@@ -3,14 +3,102 @@ html, body, #map {
   margin: 0;
 }
 
-.popup-title {
-  font-weight: 700;
-  margin-bottom: 6px;
+/* Backdrop (dim) */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 900;
 }
-.popup-row {
-  margin: 2px 0;
+
+.hidden {
+  display: none;
 }
-.popup-muted {
+
+/* Zillow-ish side panel */
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(520px, 92vw);
+  background: #fff;
+  z-index: 1000;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.20);
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(0,0,0,0.08);
+}
+
+.panel-header {
+  padding: 16px 16px 10px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.panel-title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.panel-address {
+  margin-top: 6px;
   opacity: 0.85;
-  font-size: 0.95em;
+  font-size: 14px;
 }
+
+.panel-close {
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 6px;
+  opacity: 0.8;
+}
+.panel-close:hover { opacity: 1; }
+
+.panel-body {
+  padding: 16px;
+  overflow: auto;
+}
+
+.card {
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px 12px;
+  font-size: 14px;
+}
+
+.k {
+  opacity: 0.7;
+}
+
+.v {
+  font-weight: 600;
+}
+
+.links a {
+  display: inline-block;
+  margin-right: 10px;
+  margin-top: 8px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.note {
+  font-size: 14px;
+  opacity: 0.9;
+  line-height: 1.35;
+]
