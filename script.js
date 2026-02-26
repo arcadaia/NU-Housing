@@ -1,4 +1,31 @@
 // ==============================
+// FIREBASE SETUP
+// ==============================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA7f1UN1easzEer490PYRigygmLUE_xGMw",
+  authDomain: "nu-housing-comments.firebaseapp.com",
+  projectId: "nu-housing-comments",
+  storageBucket: "nu-housing-comments.firebasestorage.app",
+  messagingSenderId: "791252409254",
+  appId: "1:791252409254:web:fad82c4d93099cc4700d67"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ==============================
 // MAP SETUP
 // ==============================
 
@@ -69,7 +96,7 @@ function milesBetween(lat1, lon1, lat2, lon2) {
 // PANEL CONTROL
 // ==============================
 
-function openPanel(apt) {
+async function openPanel(apt) {
   const dist = milesBetween(NU.lat, NU.lng, apt.lat, apt.lng).toFixed(2);
 
   panelTitle.textContent = apt.name;
@@ -113,12 +140,34 @@ function openPanel(apt) {
     </div>
 
     <div class="card">
-      <div class="section-title">Notes</div>
-      <div class="notes">${apt.notes || "—"}</div>
+      <div class="section-title">Sticky Notes</div>
+
+      <div id="notesContainer"></div>
+
+      <textarea id="newNoteText" placeholder="Leave a note..."></textarea>
+      <button id="addNoteBtn" class="primary-btn">Add Note</button>
     </div>
   `;
 
   panel.classList.remove("hidden");
+
+  loadNotes(apt.name);
+
+  document.getElementById("addNoteBtn").onclick = async () => {
+    const textArea = document.getElementById("newNoteText");
+    const text = textArea.value.trim();
+
+    if (!text) return;
+
+    await addDoc(collection(db, "comments"), {
+      apartmentId: apt.name,
+      text: text,
+      createdAt: Date.now()
+    });
+
+    textArea.value = "";
+    loadNotes(apt.name);
+  };
 }
 
 function closePanel() {
@@ -136,7 +185,29 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closePanel();
 });
 
+async function loadNotes(apartmentId) {
 
+  const notesContainer = document.getElementById("notesContainer");
+  notesContainer.innerHTML = "";
+
+  const q = query(
+    collection(db, "comments"),
+    where("apartmentId", "==", apartmentId),
+    orderBy("createdAt", "desc")
+  );
+
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+
+    const div = document.createElement("div");
+    div.className = "sticky-note";
+    div.innerText = data.text;
+
+    notesContainer.appendChild(div);
+  });
+}
 // ==============================
 // LOAD APARTMENTS
 // ==============================
