@@ -1,17 +1,6 @@
 // ==============================
-// FIREBASE SETUP
+// FIREBASE SETUP (COMPAT VERSION)
 // ==============================
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA7f1UN1easzEer490PYRigygmLUE_xGMw",
@@ -22,8 +11,8 @@ const firebaseConfig = {
   appId: "1:791252409254:web:fad82c4d93099cc4700d67"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // ==============================
 // MAP SETUP
@@ -46,20 +35,18 @@ L.circleMarker([NU.lat, NU.lng], {
   fillOpacity: 1
 }).addTo(map);
 
-
 // ==============================
 // CUSTOM MARKER ICON
 // ==============================
 
 const defaultIcon = L.icon({
-  iconUrl: "./assets/map_marker.png",
+  iconUrl: "assets/map_marker.png",
   iconSize: [32, 42],
   iconAnchor: [16, 42],
   popupAnchor: [0, -40]
 });
 
 let activeMarker = null;
-
 
 // ==============================
 // PANEL ELEMENTS
@@ -70,7 +57,6 @@ const panelTitle = document.getElementById("panelTitle");
 const panelAddress = document.getElementById("panelAddress");
 const panelBody = document.getElementById("panelBody");
 const panelClose = document.getElementById("panelClose");
-
 
 // ==============================
 // DISTANCE CALCULATION
@@ -91,12 +77,12 @@ function milesBetween(lat1, lon1, lat2, lon2) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-
 // ==============================
 // PANEL CONTROL
 // ==============================
 
 async function openPanel(apt) {
+
   const dist = milesBetween(NU.lat, NU.lng, apt.lat, apt.lng).toFixed(2);
 
   panelTitle.textContent = apt.name;
@@ -141,9 +127,7 @@ async function openPanel(apt) {
 
     <div class="card">
       <div class="section-title">Sticky Notes</div>
-
       <div id="notesContainer"></div>
-
       <textarea id="newNoteText" placeholder="Leave a note..."></textarea>
       <button id="addNoteBtn" class="primary-btn">Add Note</button>
     </div>
@@ -154,12 +138,12 @@ async function openPanel(apt) {
   loadNotes(apt.address);
 
   document.getElementById("addNoteBtn").onclick = async () => {
+
     const textArea = document.getElementById("newNoteText");
     const text = textArea.value.trim();
-
     if (!text) return;
 
-    await addDoc(collection(db, "comments"), {
+    await db.collection("comments").add({
       apartmentId: apt.address,
       text: text,
       createdAt: Date.now()
@@ -185,37 +169,36 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closePanel();
 });
 
+// ==============================
+// LOAD NOTES
+// ==============================
+
 async function loadNotes(apartmentId) {
 
   const notesContainer = document.getElementById("notesContainer");
+  if (!notesContainer) return;
+
   notesContainer.innerHTML = "";
 
-  const q = query(
-    collection(db, "comments"),
-    where("apartmentId", "==", apartmentId)
-  );
-
-  const snapshot = await getDocs(q);
+  const snapshot = await db.collection("comments")
+    .where("apartmentId", "==", apartmentId)
+    .get();
 
   snapshot.forEach(doc => {
     const data = doc.data();
-
     const div = document.createElement("div");
     div.className = "sticky-note";
     div.innerText = data.text;
-
     notesContainer.appendChild(div);
   });
 }
+
 // ==============================
 // LOAD APARTMENTS
 // ==============================
 
-fetch("./apartments.json")
-  .then(res => {
-    if (!res.ok) throw new Error("Failed to load apartments.json");
-    return res.json();
-  })
+fetch("apartments.json")
+  .then(res => res.json())
   .then(apartments => {
 
     apartments.forEach(apt => {
