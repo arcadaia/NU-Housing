@@ -145,4 +145,3 @@ fetch("./apartments.json")
       "Error: " + err.message
     );
   });
-  });
