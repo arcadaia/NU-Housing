@@ -5,19 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Evanston Apartment Map</title>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Your CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
-
   <div id="map"></div>
 
-  <!-- Centered header -->
+  <!-- Centered title -->
   <div class="topbar">
     <div class="topbar-inner">
       <div class="title">Evanston apartment map</div>
@@ -25,25 +20,23 @@
     </div>
   </div>
 
-  <!-- Modal backdrop -->
-  <div id="modalBackdrop" class="modal-backdrop hidden"></div>
+  <!-- Dim backdrop when panel open -->
+  <div id="backdrop" class="backdrop hidden"></div>
 
-  <!-- Floating modal -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-header">
+  <!-- Right-side window panel -->
+  <aside id="panel" class="panel hidden" aria-hidden="true">
+    <div class="panel-header">
       <div>
-        <div id="modalTitle" class="modal-title">Apartment</div>
-        <div id="modalAddress" class="modal-address"></div>
+        <div id="panelTitle" class="panel-title">Apartment</div>
+        <div id="panelAddress" class="panel-address"></div>
       </div>
-      <button id="modalClose" class="modal-close">×</button>
+      <button id="panelClose" class="panel-close" aria-label="Close">×</button>
     </div>
 
-    <div id="modalBody" class="modal-body"></div>
-  </div>
+    <div id="panelBody" class="panel-body"></div>
+  </aside>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./script.js"></script>
-
 </body>
 </html>
