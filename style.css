@@ -1,0 +1,16 @@
+html, body, #map {
+  height: 100%;
+  margin: 0;
+}
+
+.popup-title {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.popup-row {
+  margin: 2px 0;
+}
+.popup-muted {
+  opacity: 0.85;
+  font-size: 0.95em;
+}
