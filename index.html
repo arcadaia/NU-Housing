@@ -1,19 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evanston Apartment Map</title>
+
+  <!-- Leaflet CSS (required or map looks broken) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
 <body>
   <div class="app">
     <div id="map" class="map"></div>
 
-    <aside id="panel" class="panel hidden">
+    <aside id="panel" class="panel hidden" aria-hidden="true">
       <div class="panel-header">
         <div>
           <div id="panelTitle" class="panel-title">Apartment</div>
           <div id="panelAddress" class="panel-address"></div>
         </div>
-        <button id="panelClose" class="panel-close">×</button>
+        <button id="panelClose" class="panel-close" aria-label="Close">×</button>
       </div>
+
       <div id="panelBody" class="panel-body"></div>
     </aside>
   </div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Your JS -->
   <script src="./script.js"></script>
 </body>
+</html>
