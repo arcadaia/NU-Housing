@@ -17,6 +17,8 @@ html, body {
   overflow: hidden;
 }
 
+/* ================= MAP ================= */
+
 .mapWrap {
   position: relative;
   flex: 1;
@@ -27,9 +29,11 @@ html, body {
   width: 100%;
 }
 
+/* ================= TITLE ================= */
+
 .topbar {
   position: absolute;
-  top: 24px;
+  top: 28px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -38,31 +42,31 @@ html, body {
 
 .topbar-inner {
   background: white;
-  padding: 20px 36px;
-  border-radius: 18px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.15);
+  padding: 22px 42px;
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.15);
   text-align: center;
 }
 
 .title {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   color: #4e2a84;
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 14px;
   margin-top: 6px;
   color: #777;
 }
 
-/* Panel */
+/* ================= PANEL ================= */
 
 .panel {
-  width: 460px;
+  width: 480px;
   background: white;
   border-left: 1px solid #eee;
-  box-shadow: -12px 0 35px rgba(0,0,0,0.15);
+  box-shadow: -15px 0 40px rgba(0,0,0,0.18);
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
@@ -74,31 +78,30 @@ html, body {
 }
 
 .panel-header {
-  padding: 22px 26px;
-  border-bottom: 1px solid #eee;
+  padding: 28px;
+  border-bottom: 1px solid #f0f0f0;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
 }
 
 .panel-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #4e2a84;
 }
 
 .panel-address {
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: 14px;
+  margin-top: 6px;
   color: #666;
 }
 
 .panel-close {
   background: none;
   border: none;
-  font-size: 26px;
+  font-size: 28px;
   cursor: pointer;
-  color: #999;
+  color: #aaa;
   transition: color 0.2s;
 }
 
@@ -107,35 +110,17 @@ html, body {
 }
 
 .panel-body {
-  padding: 24px;
+  padding: 32px;
   overflow-y: auto;
-  flex: 1;
 }
 
-/* Hero image */
-
-.hero {
-  width: 100%;
-  height: 200px;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  background: #eee;
-}
-
-.hero img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Cards */
+/* ================= CARDS ================= */
 
 .card {
   background: #faf9fd;
-  border-radius: 16px;
-  padding: 18px;
-  margin-bottom: 18px;
+  border-radius: 20px;
+  padding: 26px;
+  margin-bottom: 28px;
   border: 1px solid #eee;
 }
 
@@ -143,59 +128,77 @@ html, body {
   font-size: 13px;
   font-weight: 600;
   color: #4e2a84;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
 }
 
-.kv {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 14px;
-  font-size: 14px;
+.kv-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
 }
 
-.k {
-  color: #666;
+.kv-item {
+  flex: 1;
 }
 
-.v {
-  text-align: right;
+.kv-item:not(:last-child) {
+  margin-right: 20px;
+}
+
+.kv-label {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 6px;
+}
+
+.kv-value {
+  font-size: 16px;
   font-weight: 600;
 }
 
-.links {
-  margin-top: 16px;
+/* ================= BUTTON ================= */
+
+.button-wrap {
+  margin-top: 26px;
 }
 
-.links a {
+.primary-btn {
   display: inline-block;
-  margin-right: 12px;
-  padding: 9px 16px;
-  border-radius: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
   background: #4e2a84;
   color: white;
-  font-size: 13px;
   text-decoration: none;
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
-.links a:hover {
+.primary-btn:hover {
   background: #6b46c1;
   transform: translateY(-2px);
 }
 
-/* Marker effects */
+/* ================= NOTES ================= */
+
+.notes {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #444;
+}
+
+/* ================= MARKER EFFECTS ================= */
 
 .leaflet-marker-icon {
   transition: transform 0.2s ease;
 }
 
 .leaflet-marker-icon:hover {
-  transform: scale(1.15);
+  transform: scale(1.12);
 }
 
 .selected-marker {
-  filter: drop-shadow(0 0 10px rgba(78,42,132,0.8));
-  transform: scale(1.25);
+  filter: brightness(1.35) saturate(1.2);
+  transform: scale(1.15);
 }
