@@ -151,7 +151,7 @@ async function openPanel(apt) {
 
   panel.classList.remove("hidden");
 
-  loadNotes(apt.name);
+  loadNotes(apt.address);
 
   document.getElementById("addNoteBtn").onclick = async () => {
     const textArea = document.getElementById("newNoteText");
@@ -192,8 +192,7 @@ async function loadNotes(apartmentId) {
 
   const q = query(
     collection(db, "comments"),
-    where("apartmentId", "==", apartmentId),
-    orderBy("createdAt", "desc")
+    where("apartmentId", "==", apartmentId)
   );
 
   const snapshot = await getDocs(q);
