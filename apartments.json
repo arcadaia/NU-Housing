@@ -2,15 +2,12 @@
   {
     "name": "Albion Evanston",
     "address": "1500 Sherman Ave, Evanston, IL 60201",
-    "lat": 42.0469,
-    "lng": -87.6814,
+    "lat": 42.0448734,
+    "lng": -87.6823659,
     "website": "https://albionevanston.com/",
-    "zillow": "",
     "one_bed_price": "TBD",
-    "ac": "Yes (confirm in unit)",
-    "parking": "Assigned garage (confirm)",
-    "utilities": "TBD",
-    "lease_terms": "TBD",
-    "notes": "Close to downtown Evanston."
+    "ac": "Yes",
+    "parking": "Assigned/garage (confirm)",
+    "notes": "High-end, close to downtown Evanston."
   }
 ]
