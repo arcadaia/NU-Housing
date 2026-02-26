@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Evanston Apartment Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  // Centered on Northwestern
+  var map = L.map('map').setView([42.055984, -87.675171], 14);
+
+  // OpenStreetMap tiles (free)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Example Apartment Marker
+  L.marker([42.0566, -87.6791]).addTo(map)
+    .bindPopup(`
+      <b>Albion Evanston</b><br>
+      1500 Sherman Ave<br>
+      1BR ~ $2,200+<br>
+      AC: Yes<br>
+      Parking: Assigned Garage<br>
+    `);
+
+</script>
+
+</body>
+</html>
