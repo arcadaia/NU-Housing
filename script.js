@@ -40,9 +40,6 @@ function milesBetween(lat1, lon1, lat2, lon2) {
 
 function openPanel(apt) {
   const dist = milesBetween(NU.lat, NU.lng, apt.lat, apt.lng).toFixed(2);
-  const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-    apt.address || `${apt.lat},${apt.lng}`
-  )}`;
 
   panelTitle.textContent = apt.name || "Apartment";
   panelAddress.textContent = apt.address || "";
@@ -56,11 +53,6 @@ function openPanel(apt) {
         <div class="k">AC</div><div class="v">${apt.ac || "TBD"}</div>
         <div class="k">Parking</div><div class="v">${apt.parking || "TBD"}</div>
       </div>
-
-      <div class="links">
-        ${apt.website ? `<a href="${apt.website}" target="_blank" rel="noopener">Property site</a>` : ""}
-        <a href="${directions}" target="_blank" rel="noopener">Directions</a>
-      </div>
     </div>
 
     <div class="card">
@@ -70,14 +62,20 @@ function openPanel(apt) {
   `;
 
   panel.classList.remove("hidden");
-  backdrop.classList.remove("hidden");
-  panel.setAttribute("aria-hidden", "false");
+
+  // IMPORTANT: tell Leaflet to resize after layout change
+  setTimeout(() => {
+    map.invalidateSize();
+    map.setView([apt.lat, apt.lng], 15);
+  }, 300);
 }
 
 function closePanel() {
   panel.classList.add("hidden");
-  backdrop.classList.add("hidden");
-  panel.setAttribute("aria-hidden", "true");
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 300);
 }
 
 // Close handlers
