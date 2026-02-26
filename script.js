@@ -13,15 +13,14 @@ L.circleMarker([NU.lat, NU.lng], { radius: 6 }).addTo(map);
 
 // ===== Panel elements =====
 const panel = document.getElementById("panel");
-const backdrop = document.getElementById("backdrop");
 const panelTitle = document.getElementById("panelTitle");
 const panelAddress = document.getElementById("panelAddress");
 const panelBody = document.getElementById("panelBody");
 const panelClose = document.getElementById("panelClose");
 
-// Safety check: if any are null, nothing will work
-if (!panel || !backdrop || !panelTitle || !panelAddress || !panelBody || !panelClose) {
-  alert("Panel HTML elements not found. Check index.html IDs: panel, backdrop, panelTitle, panelAddress, panelBody, panelClose.");
+// Only check for required elements
+if (!panel || !panelTitle || !panelAddress || !panelBody || !panelClose) {
+  alert("Panel HTML elements not found. Check index.html IDs.");
   throw new Error("Missing panel elements in DOM");
 }
 
