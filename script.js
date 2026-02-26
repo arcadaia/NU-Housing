@@ -6,7 +6,7 @@ firebase.initializeApp({
   apiKey: "AIzaSyA7f1UN1easzEer490PYRigygmLUE_xGMw",
   authDomain: "nu-housing-comments.firebaseapp.com",
   projectId: "nu-housing-comments",
-});
+}); 
 
 const db = firebase.firestore();
 
