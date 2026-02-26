@@ -5,45 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Northwestern Housing Finder</title>
 
-  <!-- Favicon -->
   <link rel="icon" href="./favicon.ico" type="image/x-icon">
-  <!-- Optional PNG fallback -->
   <link rel="icon" href="./favicon.png" type="image/png">
 
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Main Styles -->
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
   <div class="app">
 
-    <!-- Map Area -->
     <div class="mapWrap">
       <div id="map"></div>
 
-      <!-- Floating Title -->
-      <div class="topbar">
+      <div class="topbar" id="topbar">
         <div class="topbar-inner">
-          <div class="title">Northwestern Housing Finder</div>
-          <div class="subtitle">Click a marker to explore apartments</div>
+          <div class="topbar-title">
+            <div class="title">Northwestern Housing Finder</div>
+            <div class="subtitle">Click a marker to explore apartments</div>
+          </div>
+
+          <div class="topbar-controls">
+            <label class="control">
+              <span class="control-label">Sort</span>
+              <select id="sortSelect" class="control-select">
+                <option value="distance">Distance</option>
+                <option value="cheapest">Cheapest</option>
+              </select>
+            </label>
+
+            <button id="compareToggleBtn" class="control-btn" type="button">
+              Compare mode: Off
+            </button>
+
+            <button id="compareOpenBtn" class="control-btn primary" type="button" disabled>
+              Compare (0/2)
+            </button>
+
+            <button id="compareClearBtn" class="control-btn" type="button" disabled>
+              Clear
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Side Panel -->
     <aside id="panel" class="panel hidden" aria-hidden="true">
       <div class="panel-header">
         <div>
           <div id="panelTitle" class="panel-title">Apartment</div>
           <div id="panelAddress" class="panel-address"></div>
         </div>
-        <button id="panelClose" class="panel-close" aria-label="Close panel">×</button>
+        <button id="panelClose" class="panel-close" aria-label="Close panel" type="button">×</button>
       </div>
 
       <div id="panelBody" class="panel-body"></div>
@@ -51,25 +66,53 @@
 
   </div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Compare modal -->
+  <div id="compareModal" class="compare-modal hidden" aria-hidden="true">
+    <div class="compare-backdrop" id="compareBackdrop"></div>
 
-  <!-- Main Script -->
-  <script type="module" src="script.js"></script>
+    <div class="compare-card" role="dialog" aria-modal="true" aria-label="Compare apartments">
+      <div class="compare-header">
+        <div class="compare-title">Compare apartments</div>
+        <button id="compareCloseBtn" class="compare-close" type="button" aria-label="Close compare">×</button>
+      </div>
 
-  <!-- Sticky Notes Modal -->
-<div id="commentModal" class="modal hidden">
-  <div class="modal-content">
-    <h3>Notes</h3>
+      <div class="compare-body">
+        <div class="compare-col">
+          <div class="compare-col-title" id="cmpA_name">—</div>
+          <div class="compare-col-sub" id="cmpA_addr">—</div>
 
-    <div id="notesContainer"></div>
+          <div class="compare-grid">
+            <div class="compare-row"><div class="compare-label">Distance</div><div class="compare-value" id="cmpA_dist">—</div></div>
+            <div class="compare-row"><div class="compare-label">Rank</div><div class="compare-value" id="cmpA_rank">—</div></div>
+            <div class="compare-row"><div class="compare-label">1BR</div><div class="compare-value" id="cmpA_price">—</div></div>
+            <div class="compare-row"><div class="compare-label">AC</div><div class="compare-value" id="cmpA_ac">—</div></div>
+            <div class="compare-row"><div class="compare-label">Parking</div><div class="compare-value" id="cmpA_parking">—</div></div>
+          </div>
 
-    <textarea id="newNoteText" placeholder="Leave a note..."></textarea>
-    <button id="addNoteBtn">Add Note</button>
+          <a id="cmpA_link" class="primary-btn compare-link" href="#" target="_blank" rel="noopener noreferrer">View property website</a>
+        </div>
 
-    <button id="closeModal">Close</button>
+        <div class="compare-divider"></div>
+
+        <div class="compare-col">
+          <div class="compare-col-title" id="cmpB_name">—</div>
+          <div class="compare-col-sub" id="cmpB_addr">—</div>
+
+          <div class="compare-grid">
+            <div class="compare-row"><div class="compare-label">Distance</div><div class="compare-value" id="cmpB_dist">—</div></div>
+            <div class="compare-row"><div class="compare-label">Rank</div><div class="compare-value" id="cmpB_rank">—</div></div>
+            <div class="compare-row"><div class="compare-label">1BR</div><div class="compare-value" id="cmpB_price">—</div></div>
+            <div class="compare-row"><div class="compare-label">AC</div><div class="compare-value" id="cmpB_ac">—</div></div>
+            <div class="compare-row"><div class="compare-label">Parking</div><div class="compare-value" id="cmpB_parking">—</div></div>
+          </div>
+
+          <a id="cmpB_link" class="primary-btn compare-link" href="#" target="_blank" rel="noopener noreferrer">View property website</a>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-  
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
