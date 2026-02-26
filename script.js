@@ -11,7 +11,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19
 }).addTo(map);
 
-// Campus dot
+// Campus marker
 L.circleMarker([NU.lat, NU.lng], {
   radius: 6,
   color: "#4e2a84",
@@ -21,10 +21,8 @@ L.circleMarker([NU.lat, NU.lng], {
 
 
 // ==============================
-// CUSTOM MARKER ICONS
+// CUSTOM MARKER ICON
 // ==============================
-
-// Make sure map_marker.png is inside /assets folder
 
 const defaultIcon = L.icon({
   iconUrl: "./assets/map_marker.png",
@@ -33,13 +31,7 @@ const defaultIcon = L.icon({
   popupAnchor: [0, -40]
 });
 
-// Lighter selected version (we tint using CSS filter)
-const selectedIcon = L.icon({
-  iconUrl: "./assets/map_marker.png",
-  iconSize: [36, 48], // slightly bigger
-  iconAnchor: [18, 48],
-  popupAnchor: [0, -45]
-});
+let activeMarker = null;
 
 
 // ==============================
@@ -52,11 +44,9 @@ const panelAddress = document.getElementById("panelAddress");
 const panelBody = document.getElementById("panelBody");
 const panelClose = document.getElementById("panelClose");
 
-let activeMarker = null;
-
 
 // ==============================
-// DISTANCE FUNCTION
+// DISTANCE CALCULATION
 // ==============================
 
 function milesBetween(lat1, lon1, lat2, lon2) {
@@ -68,15 +58,15 @@ function milesBetween(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) ** 2;
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) ** 2;
 
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
 
 // ==============================
-// PANEL LOGIC
+// PANEL CONTROL
 // ==============================
 
 function openPanel(apt) {
@@ -88,21 +78,43 @@ function openPanel(apt) {
   panelBody.innerHTML = `
     <div class="card">
       <div class="section-title">Overview</div>
-      <div class="kv">
-        <div class="k">Distance</div><div class="v">${dist} mi</div>
-        <div class="k">1BR</div><div class="v">${apt.one_bed_price || "TBD"}</div>
-        <div class="k">AC</div><div class="v">${apt.ac || "TBD"}</div>
-        <div class="k">Parking</div><div class="v">${apt.parking || "TBD"}</div>
+
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">Distance</div>
+          <div class="kv-value">${dist} mi</div>
+        </div>
+
+        <div class="kv-item">
+          <div class="kv-label">1BR</div>
+          <div class="kv-value">${apt.one_bed_price || "TBD"}</div>
+        </div>
       </div>
 
-      <div class="links">
-        ${apt.website ? `<a href="${apt.website}" target="_blank">Property Site</a>` : ""}
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">AC</div>
+          <div class="kv-value">${apt.ac || "TBD"}</div>
+        </div>
+
+        <div class="kv-item">
+          <div class="kv-label">Parking</div>
+          <div class="kv-value">${apt.parking || "TBD"}</div>
+        </div>
       </div>
+
+      ${apt.website ? `
+        <div class="button-wrap">
+          <a href="${apt.website}" target="_blank" class="primary-btn">
+            View Property Website
+          </a>
+        </div>
+      ` : ""}
     </div>
 
     <div class="card">
       <div class="section-title">Notes</div>
-      <div>${apt.notes || "—"}</div>
+      <div class="notes">${apt.notes || "—"}</div>
     </div>
   `;
 
@@ -113,7 +125,7 @@ function closePanel() {
   panel.classList.add("hidden");
 
   if (activeMarker) {
-    activeMarker.setIcon(defaultIcon);
+    activeMarker.getElement().classList.remove("selected-marker");
     activeMarker = null;
   }
 }
@@ -145,14 +157,15 @@ fetch("./apartments.json")
 
       marker.on("click", () => {
 
-        // Reset previous marker
         if (activeMarker) {
-          activeMarker.setIcon(defaultIcon);
+          activeMarker.getElement().classList.remove("selected-marker");
         }
 
-        // Set this one active
         activeMarker = marker;
-        marker.setIcon(selectedIcon);
+
+        setTimeout(() => {
+          marker.getElement().classList.add("selected-marker");
+        }, 10);
 
         map.flyTo([apt.lat, apt.lng], 16, { duration: 0.6 });
 
