@@ -1,7 +1,15 @@
-const NU = { lat: 42.055984, lng: -87.675171 };
+// ===== Leaflet marker icon fix for GitHub Pages =====
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png"
+});
+
+// Northwestern (Evanston campus) center
+const NU = { name: "Northwestern (Evanston)", lat: 42.055984, lng: -87.675171 };
 
 // ===== Map =====
-const map = L.map("map").setView([NU.lat, NU.lng], 14);
+const map = L.map("map", { zoomControl: true }).setView([NU.lat, NU.lng], 14);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
@@ -18,27 +26,27 @@ const panelAddress = document.getElementById("panelAddress");
 const panelBody = document.getElementById("panelBody");
 const panelClose = document.getElementById("panelClose");
 
-// Only check for required elements
 if (!panel || !panelTitle || !panelAddress || !panelBody || !panelClose) {
-  alert("Panel HTML elements not found. Check index.html IDs.");
-  throw new Error("Missing panel elements in DOM");
+  alert("Panel elements not found. Check index.html IDs.");
+  throw new Error("Missing panel elements");
 }
 
 function milesBetween(lat1, lon1, lat2, lon2) {
   const R = 3958.8;
-  const toRad = (d) => d * Math.PI / 180;
+  const toRad = (d) => (d * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) ** 2;
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
 function openPanel(apt) {
   const dist = milesBetween(NU.lat, NU.lng, apt.lat, apt.lng).toFixed(2);
+  const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+    apt.address || `${apt.lat},${apt.lng}`
+  )}`;
 
   panelTitle.textContent = apt.name || "Apartment";
   panelAddress.textContent = apt.address || "";
@@ -52,6 +60,11 @@ function openPanel(apt) {
         <div class="k">AC</div><div class="v">${apt.ac || "TBD"}</div>
         <div class="k">Parking</div><div class="v">${apt.parking || "TBD"}</div>
       </div>
+
+      <div class="links">
+        ${apt.website ? `<a href="${apt.website}" target="_blank" rel="noopener">Property site</a>` : ""}
+        <a href="${directions}" target="_blank" rel="noopener">Directions</a>
+      </div>
     </div>
 
     <div class="card">
@@ -61,39 +74,28 @@ function openPanel(apt) {
   `;
 
   panel.classList.remove("hidden");
+  panel.setAttribute("aria-hidden", "false");
 
-  // IMPORTANT: tell Leaflet to resize after layout change
+  // Let the layout update, then resize Leaflet
   setTimeout(() => {
     map.invalidateSize();
-    map.setView([apt.lat, apt.lng], 15);
-  }, 300);
+    map.flyTo([apt.lat, apt.lng], 15, { animate: true, duration: 0.5 });
+  }, 50);
 }
 
 function closePanel() {
   panel.classList.add("hidden");
+  panel.setAttribute("aria-hidden", "true");
 
   setTimeout(() => {
     map.invalidateSize();
-  }, 300);
+  }, 50);
 }
 
-// Close handlers
 panelClose.addEventListener("click", closePanel);
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closePanel();
 });
-
-// Zoom to marker when clicked (and keep it visible with panel open)
-function focusMarker(lat, lng) {
-  map.setView([lat, lng], 16, { animate: true });
-
-  // shift left so marker isn't hidden behind right-side panel
-  setTimeout(() => {
-    if (!panel.classList.contains("hidden")) {
-      map.panBy([-220, 0], { animate: true });
-    }
-  }, 250);
-}
 
 // ===== Load apartments and add markers =====
 fetch("./apartments.json")
@@ -102,47 +104,28 @@ fetch("./apartments.json")
     return res.json();
   })
   .then((apartments) => {
-    if (!Array.isArray(apartments)) {
-      throw new Error("apartments.json must be an array: [ { ... }, { ... } ]");
-    }
+    if (!Array.isArray(apartments)) throw new Error("apartments.json must be an array");
 
-    let added = 0;
+    const bounds = [[NU.lat, NU.lng]];
 
-    apartments.forEach((apt, idx) => {
+    apartments.forEach((apt) => {
       const lat = Number(apt.lat);
       const lng = Number(apt.lng);
-
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-        console.warn(`Skipping apt[${idx}] invalid lat/lng:`, apt);
-        return;
-      }
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
       apt.lat = lat;
       apt.lng = lng;
 
       const marker = L.marker([lat, lng]).addTo(map);
-      added++;
+      bounds.push([lat, lng]);
 
-      marker.on("click", () => {
-        focusMarker(lat, lng);
-        openPanel(apt);
-      });
+      marker.on("click", () => openPanel(apt));
     });
 
-    console.log(`Markers added: ${added}/${apartments.length}`);
-
-    if (added === 0) {
-      alert("No markers were added. apartments.json loaded but lat/lng values are invalid.");
-    }
+    // Fit all points on first load
+    map.fitBounds(bounds, { padding: [40, 40] });
   })
   .catch((err) => {
     console.error(err);
-    alert(
-      "Could not load apartments.json.\n\n" +
-        "Check:\n" +
-        "• apartments.json is in the same folder as index.html\n" +
-        "• filename is exactly apartments.json (case matters)\n" +
-        "• valid JSON\n\n" +
-        "Error: " + err.message
-    );
+    alert("Error loading apartments.json: " + err.message);
   });
