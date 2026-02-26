@@ -3,22 +3,22 @@
     "name": "Albion Evanston",
     "address": "1500 Sherman Ave, Evanston, IL 60201",
     "lat": 42.045274,
-    "lng": -87.681980,
+    "lng": -87.68198,
     "website": "https://albionevanston.com/",
-    "one_bed_price": "~$2,797+",
+    "one_bed_price": "$2797",
     "ac": "Central A/C",
-    "parking": "Assigned garage (~$175/mo reported)",
+    "parking": "Assigned garage",
     "notes": "High-end downtown building. Professionally managed."
   },
   {
     "name": "AMLI Evanston",
     "address": "737 Chicago Ave, Evanston, IL 60202",
-    "lat": 42.038700,
-    "lng": -87.679540,
+    "lat": 42.0387,
+    "lng": -87.67954,
     "website": "https://www.amli.com/apartments/chicago/near-north-suburbs-apartments/amli-evanston",
-    "one_bed_price": "~$2,354+",
+    "one_bed_price": "$2354",
     "ac": "Central A/C",
-    "parking": "Reserved garage parking",
+    "parking": "Reserved garage",
     "notes": "Garage parking + EV charging available."
   },
   {
@@ -27,10 +27,10 @@
     "lat": 42.046385,
     "lng": -87.680215,
     "website": "https://www.parkevanstonapts.com/",
-    "one_bed_price": "~$2,572+",
+    "one_bed_price": "$2572",
     "ac": "Central A/C",
-    "parking": "Private garage parking",
-    "notes": "Downtown location. Managed community."
+    "parking": "Private garage",
+    "notes": "Downtown location."
   },
   {
     "name": "The Main",
@@ -38,10 +38,10 @@
     "lat": 42.038155,
     "lng": -87.679832,
     "website": "https://www.themainevanston.com/",
-    "one_bed_price": "~$2,506+",
+    "one_bed_price": "$2506",
     "ac": "Central A/C",
-    "parking": "Assigned + heated garage",
-    "notes": "Heated garage parking advertised."
+    "parking": "Heated garage",
+    "notes": "Heated assigned garage."
   },
   {
     "name": "Central Station",
@@ -49,21 +49,21 @@
     "lat": 42.064987,
     "lng": -87.699302,
     "website": "https://www.centralstationapartments.com/",
-    "one_bed_price": "~$2,729+",
-    "ac": "A/C listed",
-    "parking": "Heated indoor reserved (~$180/mo reported)",
-    "notes": "Includes EV charging stations."
+    "one_bed_price": "$2729",
+    "ac": "A/C",
+    "parking": "Heated indoor garage",
+    "notes": "Includes EV charging."
   },
   {
     "name": "The Reserve at Evanston",
     "address": "1930 Ridge Ave, Evanston, IL 60201",
-    "lat": 42.054570,
+    "lat": 42.05457,
     "lng": -87.690214,
     "website": "https://www.reserveatevanston.com/",
-    "one_bed_price": "Waitlist periods (confirm pricing)",
+    "one_bed_price": "$2600",
     "ac": "Central A/C",
-    "parking": "Heated private garage (assigned reported)",
-    "notes": "Often waitlisted for 1BR."
+    "parking": "Heated private garage",
+    "notes": "Often waitlisted."
   },
   {
     "name": "The Scholar Apartments",
@@ -71,21 +71,21 @@
     "lat": 42.045655,
     "lng": -87.683854,
     "website": "https://www.apartments.com/the-scholar-apartments-evanston-il/2f4htpb/",
-    "one_bed_price": "~$2,625",
-    "ac": "A/C listed",
-    "parking": "Parking available (confirm assignment)",
+    "one_bed_price": "$2625",
+    "ac": "A/C",
+    "parking": "Garage available",
     "notes": "EV charging listed."
   },
   {
     "name": "Evanston Gateway",
     "address": "100 Chicago Ave, Evanston, IL 60202",
-    "lat": 42.031960,
+    "lat": 42.03196,
     "lng": -87.678996,
     "website": "https://evanstongateway.com/",
-    "one_bed_price": "~$2,095+",
+    "one_bed_price": "$2095",
     "ac": "Central A/C",
-    "parking": "On-site parking (confirm assignment)",
-    "notes": "Professionally managed building."
+    "parking": "On-site garage",
+    "notes": "Professionally managed."
   },
   {
     "name": "415 Premier Apartments",
@@ -93,20 +93,20 @@
     "lat": 42.018912,
     "lng": -87.673972,
     "website": "https://www.415evanston.com/",
-    "one_bed_price": "~$1,651+",
-    "ac": "A/C listed",
-    "parking": "Private enclosed garage",
-    "notes": "Southern Evanston, closer to Chicago border."
+    "one_bed_price": "$1651",
+    "ac": "A/C",
+    "parking": "Private garage",
+    "notes": "Southern Evanston."
   },
   {
     "name": "Presidential Apartments",
     "address": "800 Hinman Ave, Evanston, IL 60202",
-    "lat": 42.034900,
-    "lng": -87.679510,
+    "lat": 42.0349,
+    "lng": -87.67951,
     "website": "https://presidentialapartments.groupfox.com/",
-    "one_bed_price": "~$1,430–$1,830 (confirm 1BR)",
-    "ac": "A/C listed",
-    "parking": "Assigned parking advertised",
-    "notes": "More budget-friendly option."
+    "one_bed_price": "$1430",
+    "ac": "A/C",
+    "parking": "Assigned parking",
+    "notes": "More budget-friendly."
   }
 ]
