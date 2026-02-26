@@ -1,151 +1,150 @@
-:root{
-  --border: rgba(0,0,0,0.10);
-  --shadow: 0 24px 80px rgba(0,0,0,0.30);
-  --radius: 18px;
-  --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  --muted: rgba(0,0,0,0.65);
+/* Make map fill entire screen */
+html, body {
+  height: 100%;
+  margin: 0;
 }
 
-html, body, #map { height: 100%; margin: 0; font-family: var(--font); }
+#map {
+  height: 100vh;
+  width: 100vw;
+}
 
-/* Centered header that won't collide with zoom controls */
-.topbar{
+/* ===== Centered Top Header ===== */
+
+.topbar {
   position: fixed;
   top: 14px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 800;
-  pointer-events: none; /* lets you click map behind it */
 }
 
-.topbar-inner{
-  pointer-events: auto;
-  background: rgba(255,255,255,0.94);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(10px);
-  border-radius: 14px;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.18);
-  padding: 12px 14px;
+.topbar-inner {
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  padding: 10px 16px;
   text-align: center;
-  min-width: 260px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
 }
 
-.title{
-  font-weight: 950;
+.title {
+  font-weight: 900;
   font-size: 16px;
-  line-height: 1.1;
-}
-.subtitle{
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--muted);
 }
 
-/* Modal backdrop */
-.modal-backdrop{
+.subtitle {
+  font-size: 12px;
+  color: rgba(0,0,0,0.6);
+  margin-top: 4px;
+}
+
+/* ===== Modal Styling ===== */
+
+.modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.40);
+  background: rgba(0,0,0,0.45);
   z-index: 900;
 }
 
-.hidden{ display: none; }
+.hidden {
+  display: none;
+}
 
-/* Floating modal (big, centered) */
-.modal{
+.modal {
   position: fixed;
-  z-index: 1000;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(920px, 92vw);
-  max-height: min(720px, 84vh);
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  width: min(900px, 90vw);
+  max-height: 85vh;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 30px 90px rgba(0,0,0,0.4);
   overflow: hidden;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
 }
 
-.modal-header{
-  padding: 18px 18px 14px 18px;
-  border-bottom: 1px solid var(--border);
-  display:flex;
-  align-items:flex-start;
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  display: flex;
   justify-content: space-between;
-  gap: 12px;
+  align-items: flex-start;
 }
 
-.modal-title{
+.modal-title {
   font-size: 22px;
-  font-weight: 950;
-  line-height: 1.15;
+  font-weight: 900;
 }
-.modal-address{
-  margin-top: 6px;
-  color: var(--muted);
+
+.modal-address {
   font-size: 13px;
-  line-height: 1.25;
+  color: rgba(0,0,0,0.6);
+  margin-top: 6px;
 }
 
-.modal-close{
-  border: 1px solid var(--border);
-  background: #fff;
-  border-radius: 12px;
-  cursor: pointer;
-  width: 42px;
-  height: 42px;
+.modal-close {
+  width: 40px;
+  height: 40px;
   font-size: 26px;
-  line-height: 1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  border: none;
+  background: #f4f4f4;
+  border-radius: 10px;
+  cursor: pointer;
 }
-.modal-close:hover{ background: rgba(0,0,0,0.04); }
 
-.modal-body{
-  padding: 18px;
+.modal-close:hover {
+  background: #e6e6e6;
+}
+
+.modal-body {
+  padding: 20px;
   overflow: auto;
 }
 
-/* Zillow-ish cards */
-.card{
-  border: 1px solid var(--border);
-  border-radius: 16px;
+.card {
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
   padding: 16px;
-  margin-bottom: 14px;
-  background: #fff;
+  margin-bottom: 16px;
 }
 
-.section-title{
+.section-title {
   font-size: 12px;
-  font-weight: 950;
-  letter-spacing: 0.03em;
+  font-weight: 900;
   text-transform: uppercase;
-  color: rgba(0,0,0,0.55);
   margin-bottom: 12px;
+  color: rgba(0,0,0,0.5);
 }
 
-.kv{
+.kv {
   display: grid;
   grid-template-columns: 150px 1fr;
-  gap: 10px 14px;
-  font-size: 14px;
+  gap: 8px 12px;
 }
-.k{ color: rgba(0,0,0,0.55); }
-.v{ font-weight: 850; }
 
-.links a{
-  display:inline-block;
-  margin-right: 10px;
-  margin-top: 12px;
-  text-decoration:none;
-  font-weight: 950;
-  font-size: 13px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
+.k {
+  color: rgba(0,0,0,0.5);
 }
-.links a:hover{ background: rgba(0,0,0,0.04); }
+
+.v {
+  font-weight: 800;
+}
+
+.links a {
+  display: inline-block;
+  margin-top: 12px;
+  margin-right: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 900;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.links a:hover {
+  background: rgba(0,0,0,0.05);
+}
