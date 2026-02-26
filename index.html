@@ -1,7 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evanston Apartment Map</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
 <body>
+
   <div id="map"></div>
 
-  <!-- Centered title -->
+  <!-- Centered header -->
   <div class="topbar">
     <div class="topbar-inner">
       <div class="title">Evanston apartment map</div>
@@ -10,21 +26,24 @@
   </div>
 
   <!-- Modal backdrop -->
-  <div id="modalBackdrop" class="modal-backdrop hidden" aria-hidden="true"></div>
+  <div id="modalBackdrop" class="modal-backdrop hidden"></div>
 
   <!-- Floating modal -->
-  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+  <div id="modal" class="modal hidden">
     <div class="modal-header">
       <div>
         <div id="modalTitle" class="modal-title">Apartment</div>
         <div id="modalAddress" class="modal-address"></div>
       </div>
-      <button id="modalClose" class="modal-close" aria-label="Close">×</button>
+      <button id="modalClose" class="modal-close">×</button>
     </div>
 
     <div id="modalBody" class="modal-body"></div>
   </div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./script.js"></script>
+
 </body>
+</html>
