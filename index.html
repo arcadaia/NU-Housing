@@ -3,44 +3,45 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Evanston Apartment Map</title>
+  <title>Northwestern Housing Finder</title>
+
+  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Leaflet CSS -->
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
   <div class="app">
-    <!-- Map area (full width unless panel opens) -->
+
     <div class="mapWrap">
       <div id="map"></div>
 
-      <!-- Title centered on the visible map area -->
       <div class="topbar">
         <div class="topbar-inner">
           <div class="title">Northwestern Housing Finder</div>
-          <div class="subtitle">Click a marker to open details</div>
+          <div class="subtitle">Click a marker to explore apartments</div>
         </div>
       </div>
     </div>
 
-    <!-- Right-side panel (hidden until click) -->
     <aside id="panel" class="panel hidden" aria-hidden="true">
       <div class="panel-header">
         <div>
           <div id="panelTitle" class="panel-title">Apartment</div>
           <div id="panelAddress" class="panel-address"></div>
         </div>
-        <button id="panelClose" class="panel-close" aria-label="Close">×</button>
+        <button id="panelClose" class="panel-close">×</button>
       </div>
 
       <div id="panelBody" class="panel-body"></div>
     </aside>
+
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./script.js"></script>
 </body>
