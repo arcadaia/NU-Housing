@@ -10,15 +10,6 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 // Campus marker
 L.circleMarker([NU.lat, NU.lng], { radius: 6 }).addTo(map);
 
-// Optional: coordinate helper. If you don't want this popup, delete this block.
-map.on("click", (e) => {
-  const { lat, lng } = e.latlng;
-  L.popup()
-    .setLatLng(e.latlng)
-    .setContent(`<b>Coordinates</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}`)
-    .openOn(map);
-});
-
 // ===== Panel elements =====
 const panel = document.getElementById("panel");
 const backdrop = document.getElementById("backdrop");
@@ -99,21 +90,59 @@ function focusMarker(lat, lng) {
   }, 250);
 }
 
-// Load apartments + add markers (NO Leaflet popups)
 fetch("./apartments.json")
-  .then(res => res.json())
-  .then(apartments => {
-    apartments.forEach(apt => {
-      apt.lat = Number(apt.lat);
-      apt.lng = Number(apt.lng);
-      if (!Number.isFinite(apt.lat) || !Number.isFinite(apt.lng)) return;
+  .then((res) => {
+    if (!res.ok) {
+      throw new Error(`apartments.json failed to load (HTTP ${res.status})`);
+    }
+    return res.json();
+  })
+  .then((apartments) => {
+    console.log("Loaded apartments:", apartments);
 
-      const marker = L.marker([apt.lat, apt.lng]).addTo(map);
+    if (!Array.isArray(apartments)) {
+      throw new Error("apartments.json is not an array. It must be like: [ { ... }, { ... } ]");
+    }
+
+    let added = 0;
+
+    apartments.forEach((apt, idx) => {
+      const lat = Number(apt.lat);
+      const lng = Number(apt.lng);
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        console.warn(`Skipping apt[${idx}] (invalid lat/lng):`, apt);
+        return;
+      }
+
+      // store back numeric
+      apt.lat = lat;
+      apt.lng = lng;
+
+      const marker = L.marker([lat, lng]).addTo(map);
+      added++;
 
       marker.on("click", () => {
-        map.closePopup();         // kills the coordinate popup if one is open
-        focusMarker(apt.lat, apt.lng);
+        focusMarker(lat, lng);
         openPanel(apt);
       });
     });
+
+    console.log(`Markers added: ${added}/${apartments.length}`);
+
+    if (added === 0) {
+      alert("No markers were added. Check apartments.json lat/lng values and that the file is loading.");
+    }
+  })
+  .catch((err) => {
+    console.error(err);
+    alert(
+      "Could not load apartments.json.\n\n" +
+      "Make sure:\n" +
+      "• apartments.json is in the SAME folder as index.html\n" +
+      "• the filename is exactly apartments.json (case matters)\n" +
+      "• it is valid JSON\n\n" +
+      "Error: " + err.message
+    );
+  });
   });
