@@ -5,19 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Evanston Apartment Map</title>
 
-  <!-- Leaflet CSS (required or map looks broken) -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
   <div class="app">
-    <div id="map" class="map"></div>
+    <!-- Map area (full width unless panel opens) -->
+    <div class="mapWrap">
+      <div id="map"></div>
 
+      <!-- Title centered on the visible map area -->
+      <div class="topbar">
+        <div class="topbar-inner">
+          <div class="title">Evanston apartment map</div>
+          <div class="subtitle">Click a marker to open details</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right-side panel (hidden until click) -->
     <aside id="panel" class="panel hidden" aria-hidden="true">
       <div class="panel-header">
         <div>
@@ -33,8 +41,6 @@
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Your JS -->
   <script src="./script.js"></script>
 </body>
 </html>
