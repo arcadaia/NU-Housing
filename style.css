@@ -1,557 +1,131 @@
-// ==============================
-// FIREBASE SETUP
-// ==============================
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyA7f1UN1easzEer490PYRigygmLUE_xGMw",
-  authDomain: "nu-housing-comments.firebaseapp.com",
-  projectId: "nu-housing-comments",
-  storageBucket: "nu-housing-comments.firebasestorage.app",
-  messagingSenderId: "791252409254",
-  appId: "1:791252409254:web:fad82c4d93099cc4700d67"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// ==============================
-// MAP SETUP
-// ==============================
-
-const NU = { lat: 42.055984, lng: -87.675171 };
-
-const map = L.map("map").setView([NU.lat, NU.lng], 14);
-
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "&copy; OpenStreetMap contributors",
-  maxZoom: 19
-}).addTo(map);
-
-// Campus marker
-L.circleMarker([NU.lat, NU.lng], {
-  radius: 6,
-  color: "#4e2a84",
-  fillColor: "#4e2a84",
-  fillOpacity: 1
-}).addTo(map);
-
-// ==============================
-// CUSTOM MARKER ICON
-// ==============================
-
-const defaultIcon = L.icon({
-  iconUrl: "./assets/map_marker.png",
-  iconSize: [32, 42],
-  iconAnchor: [16, 42],
-  popupAnchor: [0, -40]
-});
-
-let activeMarker = null;
-
-// ==============================
-// UI ELEMENTS
-// ==============================
-
-const panel = document.getElementById("panel");
-const panelTitle = document.getElementById("panelTitle");
-const panelAddress = document.getElementById("panelAddress");
-const panelBody = document.getElementById("panelBody");
-const panelClose = document.getElementById("panelClose");
-
-const sortSelect = document.getElementById("sortSelect");
-const compareToggleBtn = document.getElementById("compareToggleBtn");
-const compareOpenBtn = document.getElementById("compareOpenBtn");
-const compareClearBtn = document.getElementById("compareClearBtn");
-
-const compareModal = document.getElementById("compareModal");
-const compareBackdrop = document.getElementById("compareBackdrop");
-const compareCloseBtn = document.getElementById("compareCloseBtn");
-
-// Compare fields
-const cmpA_name = document.getElementById("cmpA_name");
-const cmpA_addr = document.getElementById("cmpA_addr");
-const cmpA_dist = document.getElementById("cmpA_dist");
-const cmpA_rank = document.getElementById("cmpA_rank");
-const cmpA_price = document.getElementById("cmpA_price");
-const cmpA_ac = document.getElementById("cmpA_ac");
-const cmpA_parking = document.getElementById("cmpA_parking");
-const cmpA_link = document.getElementById("cmpA_link");
-
-const cmpB_name = document.getElementById("cmpB_name");
-const cmpB_addr = document.getElementById("cmpB_addr");
-const cmpB_dist = document.getElementById("cmpB_dist");
-const cmpB_rank = document.getElementById("cmpB_rank");
-const cmpB_price = document.getElementById("cmpB_price");
-const cmpB_ac = document.getElementById("cmpB_ac");
-const cmpB_parking = document.getElementById("cmpB_parking");
-const cmpB_link = document.getElementById("cmpB_link");
-
-// ==============================
-// STATE
-// ==============================
-
-let apartmentsGlobal = [];
-let sortMode = "distance";
-let compareMode = false;
-let compareSelection = []; // stores apartment keys (aptKey)
-
-// Map of aptKey -> { apt, marker }
-const aptIndex = new Map();
-
-// ==============================
-// DISTANCE + PRICE HELPERS
-// ==============================
-
-function milesBetween(lat1, lon1, lat2, lon2) {
-  const R = 3958.8;
-  const toRad = (d) => d * Math.PI / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) *
-    Math.cos(toRad(lat2)) *
-    Math.sin(dLon / 2) ** 2;
-
-  return 2 * R * Math.asin(Math.sqrt(a));
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  height: 100%;
 }
 
-// Try to extract a reasonable numeric "starting price" from strings like:
-// "~$1,430–$1,830 (confirm 1BR)" or "~$2,797+"
-function parsePriceToNumber(priceStr) {
-  if (!priceStr || typeof priceStr !== "string") return null;
-
-  // Take the first number that looks like a price (supports commas)
-  const m = priceStr.match(/(\d{1,3}(?:,\d{3})+|\d{3,6})/);
-  if (!m) return null;
-
-  const n = Number(m[1].replaceAll(",", ""));
-  return Number.isFinite(n) ? n : null;
+.app {
+  display: flex;
+  height: 100vh;
 }
 
-function aptKey(apt) {
-  // Address is stable and unique in your data
-  return String(apt.address || apt.name || "").trim();
+.mapWrap {
+  flex: 1;
+  position: relative;
 }
 
-function formatDistanceMi(d) {
-  return `${d.toFixed(2)} mi`;
+#map {
+  height: 100%;
+  width: 100%;
 }
 
-function distanceRankText(apt) {
-  if (!Number.isFinite(apt.distanceRank)) return "—";
-  const suffix =
-    apt.distanceRank === 1 ? "st" :
-    apt.distanceRank === 2 ? "nd" :
-    apt.distanceRank === 3 ? "rd" : "th";
-  return `${apt.distanceRank}${suffix} closest`;
+.topbar {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 16px 24px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  z-index: 1000;
 }
 
-// ==============================
-// PANEL CONTROL
-// ==============================
-
-async function openPanel(apt) {
-  const distMi = formatDistanceMi(apt.distance);
-  const rank = distanceRankText(apt);
-
-  panelTitle.textContent = apt.name;
-  panelAddress.textContent = apt.address;
-
-  panelBody.innerHTML = `
-    <div class="card">
-      <div class="section-title">Overview</div>
-
-      <div class="kv-row">
-        <div class="kv-item">
-          <div class="kv-label">Distance</div>
-          <div class="kv-value">${distMi}</div>
-        </div>
-
-        <div class="kv-item">
-          <div class="kv-label">Rank</div>
-          <div class="kv-value">${rank}</div>
-        </div>
-      </div>
-
-      <div class="kv-row">
-        <div class="kv-item">
-          <div class="kv-label">1BR</div>
-          <div class="kv-value">${apt.one_bed_price || "TBD"}</div>
-        </div>
-
-        <div class="kv-item">
-          <div class="kv-label">AC</div>
-          <div class="kv-value">${apt.ac || "TBD"}</div>
-        </div>
-      </div>
-
-      <div class="kv-row">
-        <div class="kv-item">
-          <div class="kv-label">Parking</div>
-          <div class="kv-value">${apt.parking || "TBD"}</div>
-        </div>
-
-        <div class="kv-item">
-          <div class="kv-label">Cheapest est.</div>
-          <div class="kv-value">${apt.priceNum ? `$${apt.priceNum.toLocaleString()}` : "—"}</div>
-        </div>
-      </div>
-
-      ${apt.website ? `
-        <div class="button-wrap">
-          <a href="${apt.website}" target="_blank" rel="noopener noreferrer" class="primary-btn">
-            View Property Website
-          </a>
-        </div>
-      ` : ""}
-    </div>
-
-    <div class="card">
-      <div class="section-title">Sticky Notes</div>
-
-      <div id="notesContainer"></div>
-
-      <textarea id="newNoteText" placeholder="Leave a note..."></textarea>
-      <button id="addNoteBtn" class="primary-btn" type="button">Add Note</button>
-    </div>
-
-    <div class="card">
-      <div class="section-title">Browse</div>
-      <div class="browse-list" id="browseList"></div>
-    </div>
-  `;
-
-  panel.classList.remove("hidden");
-  document.body.classList.add("panel-open");
-  panel.setAttribute("aria-hidden", "false");
-
-  await loadNotes(aptKey(apt));
-  wireNoteSubmit(apt);
-
-  renderBrowseList();
-
-  // Topbar shrink on panel scroll
-  panelBody.removeEventListener("scroll", onPanelScroll);
-  panelBody.addEventListener("scroll", onPanelScroll);
+.topbar-inner {
+  display: flex;
+  gap: 24px;
+  align-items: center;
 }
 
-function wireNoteSubmit(apt) {
-  const btn = document.getElementById("addNoteBtn");
-  const textArea = document.getElementById("newNoteText");
-
-  btn.onclick = async () => {
-    const text = (textArea.value || "").trim();
-    if (!text) return;
-
-    await addDoc(collection(db, "comments"), {
-      apartmentId: aptKey(apt),
-      text,
-      createdAt: Date.now()
-    });
-
-    textArea.value = "";
-    await loadNotes(aptKey(apt));
-  };
+.topbar-controls {
+  display: flex;
+  gap: 12px;
 }
 
-function closePanel() {
-  panel.classList.add("hidden");
-  document.body.classList.remove("panel-open");
-  panel.setAttribute("aria-hidden", "true");
-
-  if (activeMarker) {
-    activeMarker.getElement()?.classList.remove("selected-marker");
-    activeMarker = null;
-  }
-
-  document.body.classList.remove("topbar-shrink");
+select, button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-family: inherit;
 }
 
-panelClose.addEventListener("click", closePanel);
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    if (!compareModal.classList.contains("hidden")) closeCompare();
-    else closePanel();
-  }
-});
-
-function onPanelScroll() {
-  const y = panelBody.scrollTop || 0;
-  if (y > 10) document.body.classList.add("topbar-shrink");
-  else document.body.classList.remove("topbar-shrink");
+.panel {
+  width: 380px;
+  background: #fff;
+  border-left: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
 }
 
-// ==============================
-// NOTES LOADING
-// ==============================
-
-async function loadNotes(apartmentId) {
-  const notesContainer = document.getElementById("notesContainer");
-  if (!notesContainer) return;
-
-  notesContainer.innerHTML = "";
-
-  const q = query(
-    collection(db, "comments"),
-    where("apartmentId", "==", apartmentId)
-  );
-
-  const snapshot = await getDocs(q);
-
-  snapshot.forEach(d => {
-    const data = d.data();
-    const div = document.createElement("div");
-    div.className = "sticky-note";
-    div.innerText = data.text || "";
-    notesContainer.appendChild(div);
-  });
-
-  if (snapshot.size === 0) {
-    const empty = document.createElement("div");
-    empty.className = "sticky-note";
-    empty.style.opacity = "0.75";
-    empty.innerText = "No notes yet. Add one above.";
-    notesContainer.appendChild(empty);
-  }
+.panel.hidden {
+  display: none;
 }
 
-// ==============================
-// SORTING + BROWSE LIST
-// ==============================
-
-function getSortedApartments() {
-  const arr = [...apartmentsGlobal];
-
-  if (sortMode === "cheapest") {
-    // Put unknown prices at the end
-    arr.sort((a, b) => {
-      const ap = a.priceNum ?? Number.POSITIVE_INFINITY;
-      const bp = b.priceNum ?? Number.POSITIVE_INFINITY;
-      if (ap !== bp) return ap - bp;
-      return a.distance - b.distance;
-    });
-    return arr;
-  }
-
-  // Default: distance
-  arr.sort((a, b) => a.distance - b.distance);
-  return arr;
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
 }
 
-function renderBrowseList() {
-  const listEl = document.getElementById("browseList");
-  if (!listEl) return;
-
-  const sorted = getSortedApartments();
-
-  listEl.innerHTML = "";
-  sorted.forEach((apt) => {
-    const item = document.createElement("div");
-    item.className = "browse-item";
-
-    const dist = formatDistanceMi(apt.distance);
-    const rank = distanceRankText(apt);
-    const price = apt.one_bed_price || "TBD";
-
-    item.innerHTML = `
-      <div class="browse-name">${apt.name}</div>
-      <div class="browse-meta">
-        <span class="pill">${dist}</span>
-        <span class="pill">${rank}</span>
-        <span>${price}</span>
-      </div>
-    `;
-
-    item.onclick = () => {
-      map.flyTo([apt.lat, apt.lng], 16, { duration: 0.6 });
-      openPanel(apt);
-    };
-
-    listEl.appendChild(item);
-  });
+.panel-body {
+  padding: 16px;
+  overflow-y: auto;
 }
 
-sortSelect.addEventListener("change", () => {
-  sortMode = sortSelect.value === "cheapest" ? "cheapest" : "distance";
-  // If panel is open and browse list exists, update it
-  if (!panel.classList.contains("hidden")) renderBrowseList();
-});
-
-// ==============================
-// COMPARE MODE
-// ==============================
-
-function setCompareMode(on) {
-  compareMode = !!on;
-  compareToggleBtn.textContent = compareMode ? "Compare mode: On" : "Compare mode: Off";
+.card {
+  background: #f7f4fb;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
 }
 
-function updateCompareButtons() {
-  compareOpenBtn.textContent = `Compare (${compareSelection.length}/2)`;
-  compareOpenBtn.disabled = compareSelection.length !== 2;
-  compareClearBtn.disabled = compareSelection.length === 0;
+.sticky-note {
+  background: #f5e9ff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  animation: fadeIn 0.3s ease;
 }
 
-function toggleCompareSelection(apt) {
-  const key = aptKey(apt);
-  const idx = compareSelection.indexOf(key);
-
-  if (idx >= 0) {
-    compareSelection.splice(idx, 1);
-  } else {
-    if (compareSelection.length >= 2) {
-      // Replace the oldest selection
-      compareSelection.shift();
-    }
-    compareSelection.push(key);
-  }
-
-  updateCompareButtons();
+.compare-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-compareToggleBtn.addEventListener("click", () => {
-  setCompareMode(!compareMode);
-});
-
-compareClearBtn.addEventListener("click", () => {
-  compareSelection = [];
-  updateCompareButtons();
-});
-
-compareOpenBtn.addEventListener("click", () => {
-  if (compareSelection.length !== 2) return;
-  openCompare(compareSelection[0], compareSelection[1]);
-});
-
-function openCompare(keyA, keyB) {
-  const a = aptIndex.get(keyA)?.apt;
-  const b = aptIndex.get(keyB)?.apt;
-  if (!a || !b) return;
-
-  fillCompareColumn("A", a);
-  fillCompareColumn("B", b);
-
-  compareModal.classList.remove("hidden");
-  compareModal.setAttribute("aria-hidden", "false");
+.compare-modal.hidden {
+  display: none;
 }
 
-function closeCompare() {
-  compareModal.classList.add("hidden");
-  compareModal.setAttribute("aria-hidden", "true");
+.compare-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
 }
 
-compareBackdrop.addEventListener("click", closeCompare);
-compareCloseBtn.addEventListener("click", closeCompare);
-
-function fillCompareColumn(which, apt) {
-  const dist = formatDistanceMi(apt.distance);
-  const rank = distanceRankText(apt);
-
-  const price = apt.one_bed_price || "TBD";
-  const ac = apt.ac || "TBD";
-  const parking = apt.parking || "TBD";
-  const link = apt.website || "#";
-
-  if (which === "A") {
-    cmpA_name.textContent = apt.name || "—";
-    cmpA_addr.textContent = apt.address || "—";
-    cmpA_dist.textContent = dist;
-    cmpA_rank.textContent = rank;
-    cmpA_price.textContent = price;
-    cmpA_ac.textContent = ac;
-    cmpA_parking.textContent = parking;
-
-    cmpA_link.href = link;
-    cmpA_link.style.display = apt.website ? "inline-block" : "none";
-  } else {
-    cmpB_name.textContent = apt.name || "—";
-    cmpB_addr.textContent = apt.address || "—";
-    cmpB_dist.textContent = dist;
-    cmpB_rank.textContent = rank;
-    cmpB_price.textContent = price;
-    cmpB_ac.textContent = ac;
-    cmpB_parking.textContent = parking;
-
-    cmpB_link.href = link;
-    cmpB_link.style.display = apt.website ? "inline-block" : "none";
-  }
+.compare-card {
+  position: relative;
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  width: 600px;
+  z-index: 2;
 }
 
-// ==============================
-// LOAD APARTMENTS + MARKERS
-// ==============================
+.marker-fade-in {
+  animation: markerFade 0.4s ease forwards;
+}
 
-fetch("./apartments.json")
-  .then(res => {
-    if (!res.ok) throw new Error("Failed to load apartments.json");
-    return res.json();
-  })
-  .then(apartments => {
-    // Compute distance + priceNum
-    apartments.forEach(apt => {
-      apt.distance = milesBetween(NU.lat, NU.lng, Number(apt.lat), Number(apt.lng));
-      apt.priceNum = parsePriceToNumber(apt.one_bed_price);
-    });
+@keyframes markerFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-    // Compute distance rank
-    const byDist = [...apartments].sort((a, b) => a.distance - b.distance);
-    byDist.forEach((apt, i) => {
-      apt.distanceRank = i + 1;
-    });
-
-    apartmentsGlobal = apartments;
-
-    // Create markers
-    apartments.forEach(apt => {
-      const marker = L.marker([Number(apt.lat), Number(apt.lng)], { icon: defaultIcon }).addTo(map);
-
-      // Fade-in animation for markers
-      setTimeout(() => {
-        const el = marker.getElement();
-        if (el) el.classList.add("marker-fade-in");
-      }, 0);
-
-      const key = aptKey(apt);
-      aptIndex.set(key, { apt, marker });
-
-      marker.on("click", () => {
-        if (compareMode) {
-          toggleCompareSelection(apt);
-          return;
-        }
-
-        // Normal behavior: select marker + open panel
-        if (activeMarker) {
-          activeMarker.getElement()?.classList.remove("selected-marker");
-        }
-
-        activeMarker = marker;
-
-        setTimeout(() => {
-          marker.getElement()?.classList.add("selected-marker");
-        }, 10);
-
-        map.flyTo([apt.lat, apt.lng], 16, { duration: 0.6 });
-        openPanel(apt);
-      });
-    });
-
-    updateCompareButtons();
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Could not load apartments.json");
-  });
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
