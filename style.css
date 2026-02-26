@@ -1,581 +1,557 @@
-/* ================= GLOBAL ================= */
+// ==============================
+// FIREBASE SETUP
+// ==============================
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA7f1UN1easzEer490PYRigygmLUE_xGMw",
+  authDomain: "nu-housing-comments.firebaseapp.com",
+  projectId: "nu-housing-comments",
+  storageBucket: "nu-housing-comments.firebasestorage.app",
+  messagingSenderId: "791252409254",
+  appId: "1:791252409254:web:fad82c4d93099cc4700d67"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ==============================
+// MAP SETUP
+// ==============================
+
+const NU = { lat: 42.055984, lng: -87.675171 };
+
+const map = L.map("map").setView([NU.lat, NU.lng], 14);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors",
+  maxZoom: 19
+}).addTo(map);
+
+// Campus marker
+L.circleMarker([NU.lat, NU.lng], {
+  radius: 6,
+  color: "#4e2a84",
+  fillColor: "#4e2a84",
+  fillOpacity: 1
+}).addTo(map);
+
+// ==============================
+// CUSTOM MARKER ICON
+// ==============================
+
+const defaultIcon = L.icon({
+  iconUrl: "./assets/map_marker.png",
+  iconSize: [32, 42],
+  iconAnchor: [16, 42],
+  popupAnchor: [0, -40]
+});
+
+let activeMarker = null;
+
+// ==============================
+// UI ELEMENTS
+// ==============================
+
+const panel = document.getElementById("panel");
+const panelTitle = document.getElementById("panelTitle");
+const panelAddress = document.getElementById("panelAddress");
+const panelBody = document.getElementById("panelBody");
+const panelClose = document.getElementById("panelClose");
+
+const sortSelect = document.getElementById("sortSelect");
+const compareToggleBtn = document.getElementById("compareToggleBtn");
+const compareOpenBtn = document.getElementById("compareOpenBtn");
+const compareClearBtn = document.getElementById("compareClearBtn");
+
+const compareModal = document.getElementById("compareModal");
+const compareBackdrop = document.getElementById("compareBackdrop");
+const compareCloseBtn = document.getElementById("compareCloseBtn");
+
+// Compare fields
+const cmpA_name = document.getElementById("cmpA_name");
+const cmpA_addr = document.getElementById("cmpA_addr");
+const cmpA_dist = document.getElementById("cmpA_dist");
+const cmpA_rank = document.getElementById("cmpA_rank");
+const cmpA_price = document.getElementById("cmpA_price");
+const cmpA_ac = document.getElementById("cmpA_ac");
+const cmpA_parking = document.getElementById("cmpA_parking");
+const cmpA_link = document.getElementById("cmpA_link");
+
+const cmpB_name = document.getElementById("cmpB_name");
+const cmpB_addr = document.getElementById("cmpB_addr");
+const cmpB_dist = document.getElementById("cmpB_dist");
+const cmpB_rank = document.getElementById("cmpB_rank");
+const cmpB_price = document.getElementById("cmpB_price");
+const cmpB_ac = document.getElementById("cmpB_ac");
+const cmpB_parking = document.getElementById("cmpB_parking");
+const cmpB_link = document.getElementById("cmpB_link");
+
+// ==============================
+// STATE
+// ==============================
+
+let apartmentsGlobal = [];
+let sortMode = "distance";
+let compareMode = false;
+let compareSelection = []; // stores apartment keys (aptKey)
+
+// Map of aptKey -> { apt, marker }
+const aptIndex = new Map();
+
+// ==============================
+// DISTANCE + PRICE HELPERS
+// ==============================
+
+function milesBetween(lat1, lon1, lat2, lon2) {
+  const R = 3958.8;
+  const toRad = (d) => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) *
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+
+  return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-html, body {
-  height: 100%;
-  font-family: "Inter", sans-serif;
-  background: #f6f4fb;
-  color: #2d2d2d;
+// Try to extract a reasonable numeric "starting price" from strings like:
+// "~$1,430–$1,830 (confirm 1BR)" or "~$2,797+"
+function parsePriceToNumber(priceStr) {
+  if (!priceStr || typeof priceStr !== "string") return null;
+
+  // Take the first number that looks like a price (supports commas)
+  const m = priceStr.match(/(\d{1,3}(?:,\d{3})+|\d{3,6})/);
+  if (!m) return null;
+
+  const n = Number(m[1].replaceAll(",", ""));
+  return Number.isFinite(n) ? n : null;
 }
 
-.app {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
+function aptKey(apt) {
+  // Address is stable and unique in your data
+  return String(apt.address || apt.name || "").trim();
 }
 
-/* ================= MAP ================= */
-
-.mapWrap {
-  position: relative;
-  flex: 1;
+function formatDistanceMi(d) {
+  return `${d.toFixed(2)} mi`;
 }
 
-#map {
-  height: 100%;
-  width: 100%;
+function distanceRankText(apt) {
+  if (!Number.isFinite(apt.distanceRank)) return "—";
+  const suffix =
+    apt.distanceRank === 1 ? "st" :
+    apt.distanceRank === 2 ? "nd" :
+    apt.distanceRank === 3 ? "rd" : "th";
+  return `${apt.distanceRank}${suffix} closest`;
 }
 
-/* Blur background behind panel */
-body.panel-open #map {
-  filter: blur(6px) saturate(1.05);
-  transition: filter 0.25s ease;
-}
-#map {
-  transition: filter 0.25s ease;
-}
+// ==============================
+// PANEL CONTROL
+// ==============================
 
-/* ================= TOPBAR ================= */
+async function openPanel(apt) {
+  const distMi = formatDistanceMi(apt.distance);
+  const rank = distanceRankText(apt);
 
-.topbar {
-  position: absolute;
-  top: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  pointer-events: none;
-}
+  panelTitle.textContent = apt.name;
+  panelAddress.textContent = apt.address;
 
-.topbar-inner {
-  pointer-events: auto;
-  background: white;
-  padding: 18px 22px;
-  border-radius: 20px;
-  box-shadow: 0 20px 45px rgba(0,0,0,0.15);
-  text-align: center;
-  display: grid;
-  gap: 14px;
-  min-width: 560px;
-}
+  panelBody.innerHTML = `
+    <div class="card">
+      <div class="section-title">Overview</div>
 
-.topbar-title {
-  display: grid;
-  gap: 6px;
-}
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">Distance</div>
+          <div class="kv-value">${distMi}</div>
+        </div>
 
-.title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #4e2a84;
-}
+        <div class="kv-item">
+          <div class="kv-label">Rank</div>
+          <div class="kv-value">${rank}</div>
+        </div>
+      </div>
 
-.subtitle {
-  font-size: 14px;
-  color: #777;
-}
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">1BR</div>
+          <div class="kv-value">${apt.one_bed_price || "TBD"}</div>
+        </div>
 
-.topbar-controls {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+        <div class="kv-item">
+          <div class="kv-label">AC</div>
+          <div class="kv-value">${apt.ac || "TBD"}</div>
+        </div>
+      </div>
 
-.control {
-  display: grid;
-  gap: 6px;
-  text-align: left;
-}
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">Parking</div>
+          <div class="kv-value">${apt.parking || "TBD"}</div>
+        </div>
 
-.control-label {
-  font-size: 12px;
-  color: #666;
-}
+        <div class="kv-item">
+          <div class="kv-label">Cheapest est.</div>
+          <div class="kv-value">${apt.priceNum ? `$${apt.priceNum.toLocaleString()}` : "—"}</div>
+        </div>
+      </div>
 
-.control-select {
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid #e7e3f3;
-  padding: 0 12px;
-  background: #faf9fd;
-  font-family: inherit;
-  font-size: 14px;
-}
+      ${apt.website ? `
+        <div class="button-wrap">
+          <a href="${apt.website}" target="_blank" rel="noopener noreferrer" class="primary-btn">
+            View Property Website
+          </a>
+        </div>
+      ` : ""}
+    </div>
 
-.control-btn {
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid #e7e3f3;
-  background: #faf9fd;
-  padding: 0 12px;
-  font-family: inherit;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.2s ease, border 0.2s ease, opacity 0.2s ease;
-}
+    <div class="card">
+      <div class="section-title">Sticky Notes</div>
 
-.control-btn:hover {
-  background: #f2effb;
-  transform: translateY(-1px);
+      <div id="notesContainer"></div>
+
+      <textarea id="newNoteText" placeholder="Leave a note..."></textarea>
+      <button id="addNoteBtn" class="primary-btn" type="button">Add Note</button>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Browse</div>
+      <div class="browse-list" id="browseList"></div>
+    </div>
+  `;
+
+  panel.classList.remove("hidden");
+  document.body.classList.add("panel-open");
+  panel.setAttribute("aria-hidden", "false");
+
+  await loadNotes(aptKey(apt));
+  wireNoteSubmit(apt);
+
+  renderBrowseList();
+
+  // Topbar shrink on panel scroll
+  panelBody.removeEventListener("scroll", onPanelScroll);
+  panelBody.addEventListener("scroll", onPanelScroll);
 }
 
-.control-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
+function wireNoteSubmit(apt) {
+  const btn = document.getElementById("addNoteBtn");
+  const textArea = document.getElementById("newNoteText");
+
+  btn.onclick = async () => {
+    const text = (textArea.value || "").trim();
+    if (!text) return;
+
+    await addDoc(collection(db, "comments"), {
+      apartmentId: aptKey(apt),
+      text,
+      createdAt: Date.now()
+    });
+
+    textArea.value = "";
+    await loadNotes(aptKey(apt));
+  };
 }
 
-.control-btn.primary {
-  background: #4e2a84;
-  color: white;
-  border: 1px solid #4e2a84;
-}
+function closePanel() {
+  panel.classList.add("hidden");
+  document.body.classList.remove("panel-open");
+  panel.setAttribute("aria-hidden", "true");
 
-.control-btn.primary:hover {
-  background: #6b46c1;
-}
-
-/* Shrink topbar when panel scrolls */
-body.topbar-shrink .topbar-inner {
-  padding: 12px 18px;
-  border-radius: 18px;
-  min-width: 520px;
-}
-body.topbar-shrink .title {
-  font-size: 22px;
-}
-body.topbar-shrink .subtitle {
-  font-size: 13px;
-}
-
-/* ================= PANEL ================= */
-
-.panel {
-  width: 480px;
-  background: white;
-  border-left: 1px solid #eee;
-  box-shadow: -15px 0 40px rgba(0,0,0,0.18);
-  display: flex;
-  flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.35s ease;
-}
-
-.panel:not(.hidden) {
-  transform: translateX(0);
-}
-
-.panel-header {
-  padding: 28px;
-  border-bottom: 1px solid #f0f0f0;
-  display: flex;
-  justify-content: space-between;
-}
-
-.panel-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #4e2a84;
-}
-
-.panel-address {
-  font-size: 14px;
-  margin-top: 6px;
-  color: #666;
-}
-
-.panel-close {
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #aaa;
-  transition: color 0.2s;
-}
-
-.panel-close:hover {
-  color: #4e2a84;
-}
-
-.panel-body {
-  padding: 32px;
-  overflow-y: auto;
-}
-
-/* ================= CARDS ================= */
-
-.card {
-  background: #faf9fd;
-  border-radius: 20px;
-  padding: 26px;
-  margin-bottom: 28px;
-  border: 1px solid #eee;
-}
-
-.section-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #4e2a84;
-  margin-bottom: 20px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.kv-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.kv-item {
-  flex: 1;
-}
-
-.kv-item:not(:last-child) {
-  margin-right: 20px;
-}
-
-.kv-label {
-  font-size: 13px;
-  color: #777;
-  margin-bottom: 6px;
-}
-
-.kv-value {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-/* ================= BUTTON ================= */
-
-.button-wrap {
-  margin-top: 26px;
-}
-
-.primary-btn {
-  display: inline-block;
-  padding: 12px 20px;
-  border-radius: 12px;
-  background: #4e2a84;
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.primary-btn:hover {
-  background: #6b46c1;
-  transform: translateY(-2px);
-}
-
-/* ================= BROWSE LIST ================= */
-
-.browse-list {
-  display: grid;
-  gap: 10px;
-}
-
-.browse-item {
-  background: white;
-  border: 1px solid #eee;
-  border-radius: 14px;
-  padding: 12px 14px;
-  cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.2s ease;
-}
-
-.browse-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-}
-
-.browse-name {
-  font-weight: 600;
-  font-size: 14px;
-  color: #2d2d2d;
-}
-
-.browse-meta {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #666;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.pill {
-  background: #f1e9ff;
-  color: #4e2a84;
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-weight: 600;
-}
-
-/* ================= STICKY NOTES ================= */
-
-#notesContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-@keyframes noteIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px) rotate(-1deg);
+  if (activeMarker) {
+    activeMarker.getElement()?.classList.remove("selected-marker");
+    activeMarker = null;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotate(-1deg);
+
+  document.body.classList.remove("topbar-shrink");
+}
+
+panelClose.addEventListener("click", closePanel);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    if (!compareModal.classList.contains("hidden")) closeCompare();
+    else closePanel();
+  }
+});
+
+function onPanelScroll() {
+  const y = panelBody.scrollTop || 0;
+  if (y > 10) document.body.classList.add("topbar-shrink");
+  else document.body.classList.remove("topbar-shrink");
+}
+
+// ==============================
+// NOTES LOADING
+// ==============================
+
+async function loadNotes(apartmentId) {
+  const notesContainer = document.getElementById("notesContainer");
+  if (!notesContainer) return;
+
+  notesContainer.innerHTML = "";
+
+  const q = query(
+    collection(db, "comments"),
+    where("apartmentId", "==", apartmentId)
+  );
+
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach(d => {
+    const data = d.data();
+    const div = document.createElement("div");
+    div.className = "sticky-note";
+    div.innerText = data.text || "";
+    notesContainer.appendChild(div);
+  });
+
+  if (snapshot.size === 0) {
+    const empty = document.createElement("div");
+    empty.className = "sticky-note";
+    empty.style.opacity = "0.75";
+    empty.innerText = "No notes yet. Add one above.";
+    notesContainer.appendChild(empty);
   }
 }
 
-.sticky-note {
-  background: #f1e9ff;
-  padding: 14px 16px;
-  border-radius: 14px;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
-  font-size: 14px;
-  line-height: 1.5;
-  color: #3a3a3a;
-  transform: rotate(-1deg);
-  transition: transform 0.15s ease;
-  animation: noteIn 0.22s ease both;
-}
+// ==============================
+// SORTING + BROWSE LIST
+// ==============================
 
-.sticky-note:nth-child(even) {
-  transform: rotate(1deg);
-}
+function getSortedApartments() {
+  const arr = [...apartmentsGlobal];
 
-.sticky-note:nth-child(even) {
-  animation-name: noteInEven;
-}
-
-@keyframes noteInEven {
-  from {
-    opacity: 0;
-    transform: translateY(6px) rotate(1deg);
+  if (sortMode === "cheapest") {
+    // Put unknown prices at the end
+    arr.sort((a, b) => {
+      const ap = a.priceNum ?? Number.POSITIVE_INFINITY;
+      const bp = b.priceNum ?? Number.POSITIVE_INFINITY;
+      if (ap !== bp) return ap - bp;
+      return a.distance - b.distance;
+    });
+    return arr;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) rotate(1deg);
+
+  // Default: distance
+  arr.sort((a, b) => a.distance - b.distance);
+  return arr;
+}
+
+function renderBrowseList() {
+  const listEl = document.getElementById("browseList");
+  if (!listEl) return;
+
+  const sorted = getSortedApartments();
+
+  listEl.innerHTML = "";
+  sorted.forEach((apt) => {
+    const item = document.createElement("div");
+    item.className = "browse-item";
+
+    const dist = formatDistanceMi(apt.distance);
+    const rank = distanceRankText(apt);
+    const price = apt.one_bed_price || "TBD";
+
+    item.innerHTML = `
+      <div class="browse-name">${apt.name}</div>
+      <div class="browse-meta">
+        <span class="pill">${dist}</span>
+        <span class="pill">${rank}</span>
+        <span>${price}</span>
+      </div>
+    `;
+
+    item.onclick = () => {
+      map.flyTo([apt.lat, apt.lng], 16, { duration: 0.6 });
+      openPanel(apt);
+    };
+
+    listEl.appendChild(item);
+  });
+}
+
+sortSelect.addEventListener("change", () => {
+  sortMode = sortSelect.value === "cheapest" ? "cheapest" : "distance";
+  // If panel is open and browse list exists, update it
+  if (!panel.classList.contains("hidden")) renderBrowseList();
+});
+
+// ==============================
+// COMPARE MODE
+// ==============================
+
+function setCompareMode(on) {
+  compareMode = !!on;
+  compareToggleBtn.textContent = compareMode ? "Compare mode: On" : "Compare mode: Off";
+}
+
+function updateCompareButtons() {
+  compareOpenBtn.textContent = `Compare (${compareSelection.length}/2)`;
+  compareOpenBtn.disabled = compareSelection.length !== 2;
+  compareClearBtn.disabled = compareSelection.length === 0;
+}
+
+function toggleCompareSelection(apt) {
+  const key = aptKey(apt);
+  const idx = compareSelection.indexOf(key);
+
+  if (idx >= 0) {
+    compareSelection.splice(idx, 1);
+  } else {
+    if (compareSelection.length >= 2) {
+      // Replace the oldest selection
+      compareSelection.shift();
+    }
+    compareSelection.push(key);
   }
+
+  updateCompareButtons();
 }
 
-.sticky-note:hover {
-  transform: rotate(0deg) scale(1.02);
+compareToggleBtn.addEventListener("click", () => {
+  setCompareMode(!compareMode);
+});
+
+compareClearBtn.addEventListener("click", () => {
+  compareSelection = [];
+  updateCompareButtons();
+});
+
+compareOpenBtn.addEventListener("click", () => {
+  if (compareSelection.length !== 2) return;
+  openCompare(compareSelection[0], compareSelection[1]);
+});
+
+function openCompare(keyA, keyB) {
+  const a = aptIndex.get(keyA)?.apt;
+  const b = aptIndex.get(keyB)?.apt;
+  if (!a || !b) return;
+
+  fillCompareColumn("A", a);
+  fillCompareColumn("B", b);
+
+  compareModal.classList.remove("hidden");
+  compareModal.setAttribute("aria-hidden", "false");
 }
 
-#newNoteText {
-  width: 100%;
-  min-height: 80px;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1px solid #e5e1f4;
-  background: #faf9fd;
-  font-family: inherit;
-  font-size: 14px;
-  resize: vertical;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
+function closeCompare() {
+  compareModal.classList.add("hidden");
+  compareModal.setAttribute("aria-hidden", "true");
 }
 
-#newNoteText:focus {
-  outline: none;
-  border: 1px solid #bfa8ff;
-  box-shadow: 0 0 0 3px rgba(191,168,255,0.2);
-}
+compareBackdrop.addEventListener("click", closeCompare);
+compareCloseBtn.addEventListener("click", closeCompare);
 
-/* ================= MARKER EFFECTS ================= */
+function fillCompareColumn(which, apt) {
+  const dist = formatDistanceMi(apt.distance);
+  const rank = distanceRankText(apt);
 
-.leaflet-marker-icon {
-  transition: transform 0.2s ease, opacity 0.35s ease;
-  opacity: 0;
-}
+  const price = apt.one_bed_price || "TBD";
+  const ac = apt.ac || "TBD";
+  const parking = apt.parking || "TBD";
+  const link = apt.website || "#";
 
-.leaflet-marker-icon.marker-fade-in {
-  opacity: 1;
-}
+  if (which === "A") {
+    cmpA_name.textContent = apt.name || "—";
+    cmpA_addr.textContent = apt.address || "—";
+    cmpA_dist.textContent = dist;
+    cmpA_rank.textContent = rank;
+    cmpA_price.textContent = price;
+    cmpA_ac.textContent = ac;
+    cmpA_parking.textContent = parking;
 
-.leaflet-marker-icon:hover {
-  transform: scale(1.12);
-}
+    cmpA_link.href = link;
+    cmpA_link.style.display = apt.website ? "inline-block" : "none";
+  } else {
+    cmpB_name.textContent = apt.name || "—";
+    cmpB_addr.textContent = apt.address || "—";
+    cmpB_dist.textContent = dist;
+    cmpB_rank.textContent = rank;
+    cmpB_price.textContent = price;
+    cmpB_ac.textContent = ac;
+    cmpB_parking.textContent = parking;
 
-.selected-marker {
-  filter: brightness(1.35) saturate(1.2);
-  transform: scale(1.15);
-}
-
-/* ================= COMPARE MODAL ================= */
-
-.hidden {
-  display: none;
-}
-
-.compare-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-}
-
-.compare-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(6px);
-}
-
-.compare-card {
-  position: relative;
-  margin: 70px auto;
-  width: min(980px, calc(100% - 30px));
-  background: white;
-  border-radius: 22px;
-  box-shadow: 0 25px 70px rgba(0,0,0,0.25);
-  overflow: hidden;
-}
-
-.compare-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  border-bottom: 1px solid #eee;
-}
-
-.compare-title {
-  font-weight: 800;
-  font-size: 18px;
-  color: #4e2a84;
-}
-
-.compare-close {
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #999;
-}
-
-.compare-close:hover {
-  color: #4e2a84;
-}
-
-.compare-body {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 0;
-  padding: 22px;
-}
-
-.compare-divider {
-  width: 1px;
-  background: #eee;
-}
-
-.compare-col-title {
-  font-weight: 800;
-  font-size: 18px;
-  color: #2d2d2d;
-}
-
-.compare-col-sub {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #666;
-}
-
-.compare-grid {
-  margin-top: 16px;
-  display: grid;
-  gap: 10px;
-}
-
-.compare-row {
-  background: #faf9fd;
-  border: 1px solid #eee;
-  border-radius: 14px;
-  padding: 12px 14px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.compare-label {
-  color: #666;
-  font-size: 13px;
-}
-
-.compare-value {
-  font-weight: 700;
-  font-size: 13px;
-  color: #2d2d2d;
-  text-align: right;
-}
-
-.compare-link {
-  margin-top: 14px;
-  width: 100%;
-  text-align: center;
-}
-
-/* ================= MOBILE RESPONSIVENESS ================= */
-
-@media (max-width: 980px) {
-  .topbar-inner {
-    min-width: auto;
-    width: calc(100vw - 28px);
+    cmpB_link.href = link;
+    cmpB_link.style.display = apt.website ? "inline-block" : "none";
   }
 }
 
-@media (max-width: 900px) {
-  .app {
-    flex-direction: column;
-  }
+// ==============================
+// LOAD APARTMENTS + MARKERS
+// ==============================
 
-  .panel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 72vh;
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid #eee;
-    transform: translateY(100%);
-  }
+fetch("./apartments.json")
+  .then(res => {
+    if (!res.ok) throw new Error("Failed to load apartments.json");
+    return res.json();
+  })
+  .then(apartments => {
+    // Compute distance + priceNum
+    apartments.forEach(apt => {
+      apt.distance = milesBetween(NU.lat, NU.lng, Number(apt.lat), Number(apt.lng));
+      apt.priceNum = parsePriceToNumber(apt.one_bed_price);
+    });
 
-  .panel:not(.hidden) {
-    transform: translateY(0);
-  }
+    // Compute distance rank
+    const byDist = [...apartments].sort((a, b) => a.distance - b.distance);
+    byDist.forEach((apt, i) => {
+      apt.distanceRank = i + 1;
+    });
 
-  .panel-body {
-    padding: 22px;
-  }
+    apartmentsGlobal = apartments;
 
-  body.panel-open #map {
-    filter: blur(6px) saturate(1.05);
-  }
+    // Create markers
+    apartments.forEach(apt => {
+      const marker = L.marker([Number(apt.lat), Number(apt.lng)], { icon: defaultIcon }).addTo(map);
 
-  .compare-body {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
+      // Fade-in animation for markers
+      setTimeout(() => {
+        const el = marker.getElement();
+        if (el) el.classList.add("marker-fade-in");
+      }, 0);
 
-  .compare-divider {
-    display: none;
-  }
+      const key = aptKey(apt);
+      aptIndex.set(key, { apt, marker });
 
-  .compare-card {
-    margin: 60px auto;
-  }
-}
+      marker.on("click", () => {
+        if (compareMode) {
+          toggleCompareSelection(apt);
+          return;
+        }
+
+        // Normal behavior: select marker + open panel
+        if (activeMarker) {
+          activeMarker.getElement()?.classList.remove("selected-marker");
+        }
+
+        activeMarker = marker;
+
+        setTimeout(() => {
+          marker.getElement()?.classList.add("selected-marker");
+        }, 10);
+
+        map.flyTo([apt.lat, apt.lng], 16, { duration: 0.6 });
+        openPanel(apt);
+      });
+    });
+
+    updateCompareButtons();
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Could not load apartments.json");
+  });
