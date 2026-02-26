@@ -166,7 +166,7 @@ async function openPanel(apt) {
     });
 
     textArea.value = "";
-    loadNotes(apt.name);
+    loadNotes(apt.address);
   };
 }
 
