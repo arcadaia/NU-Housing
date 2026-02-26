@@ -160,7 +160,7 @@ async function openPanel(apt) {
     if (!text) return;
 
     await addDoc(collection(db, "comments"), {
-      apartmentId: apt.name,
+      apartmentId: apt.address,
       text: text,
       createdAt: Date.now()
     });
