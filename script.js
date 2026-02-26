@@ -1,5 +1,6 @@
 const NU = { lat: 42.055984, lng: -87.675171 };
 
+// ===== Map =====
 const map = L.map("map").setView([NU.lat, NU.lng], 14);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -18,22 +19,30 @@ const panelAddress = document.getElementById("panelAddress");
 const panelBody = document.getElementById("panelBody");
 const panelClose = document.getElementById("panelClose");
 
+// Safety check: if any are null, nothing will work
+if (!panel || !backdrop || !panelTitle || !panelAddress || !panelBody || !panelClose) {
+  alert("Panel HTML elements not found. Check index.html IDs: panel, backdrop, panelTitle, panelAddress, panelBody, panelClose.");
+  throw new Error("Missing panel elements in DOM");
+}
+
 function milesBetween(lat1, lon1, lat2, lon2) {
   const R = 3958.8;
   const toRad = (d) => d * Math.PI / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
-    Math.sin(dLat/2)**2 +
+    Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) *
-    Math.cos(toRad(lat2)) *
-    Math.sin(dLon/2)**2;
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
 function openPanel(apt) {
   const dist = milesBetween(NU.lat, NU.lng, apt.lat, apt.lng).toFixed(2);
-  const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(apt.address)}`;
+  const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+    apt.address || `${apt.lat},${apt.lng}`
+  )}`;
 
   panelTitle.textContent = apt.name || "Apartment";
   panelAddress.textContent = apt.address || "";
@@ -71,37 +80,34 @@ function closePanel() {
   panel.setAttribute("aria-hidden", "true");
 }
 
-// Close handlers (THIS is what fixes your X not working)
+// Close handlers
 panelClose.addEventListener("click", closePanel);
 backdrop.addEventListener("click", closePanel);
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closePanel();
 });
 
-// Zoom to marker when clicked (and keep it visible)
+// Zoom to marker when clicked (and keep it visible with panel open)
 function focusMarker(lat, lng) {
   map.setView([lat, lng], 16, { animate: true });
 
-  // If panel is open on the right, shift view left a bit so marker isn't hidden
+  // shift left so marker isn't hidden behind right-side panel
   setTimeout(() => {
     if (!panel.classList.contains("hidden")) {
-      map.panBy([-220, 0], { animate: true }); // tweak this if needed
+      map.panBy([-220, 0], { animate: true });
     }
   }, 250);
 }
 
+// ===== Load apartments and add markers =====
 fetch("./apartments.json")
   .then((res) => {
-    if (!res.ok) {
-      throw new Error(`apartments.json failed to load (HTTP ${res.status})`);
-    }
+    if (!res.ok) throw new Error(`apartments.json failed to load (HTTP ${res.status})`);
     return res.json();
   })
   .then((apartments) => {
-    console.log("Loaded apartments:", apartments);
-
     if (!Array.isArray(apartments)) {
-      throw new Error("apartments.json is not an array. It must be like: [ { ... }, { ... } ]");
+      throw new Error("apartments.json must be an array: [ { ... }, { ... } ]");
     }
 
     let added = 0;
@@ -111,11 +117,10 @@ fetch("./apartments.json")
       const lng = Number(apt.lng);
 
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-        console.warn(`Skipping apt[${idx}] (invalid lat/lng):`, apt);
+        console.warn(`Skipping apt[${idx}] invalid lat/lng:`, apt);
         return;
       }
 
-      // store back numeric
       apt.lat = lat;
       apt.lng = lng;
 
@@ -131,17 +136,17 @@ fetch("./apartments.json")
     console.log(`Markers added: ${added}/${apartments.length}`);
 
     if (added === 0) {
-      alert("No markers were added. Check apartments.json lat/lng values and that the file is loading.");
+      alert("No markers were added. apartments.json loaded but lat/lng values are invalid.");
     }
   })
   .catch((err) => {
     console.error(err);
     alert(
       "Could not load apartments.json.\n\n" +
-      "Make sure:\n" +
-      "• apartments.json is in the SAME folder as index.html\n" +
-      "• the filename is exactly apartments.json (case matters)\n" +
-      "• it is valid JSON\n\n" +
-      "Error: " + err.message
+        "Check:\n" +
+        "• apartments.json is in the same folder as index.html\n" +
+        "• filename is exactly apartments.json (case matters)\n" +
+        "• valid JSON\n\n" +
+        "Error: " + err.message
     );
   });
