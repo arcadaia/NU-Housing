@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Albion Evanston",
+    "address": "1500 Sherman Ave, Evanston, IL 60201",
+    "lat": 42.0469,
+    "lng": -87.6814,
+    "one_bed_price": "TBD",
+    "ac": "Yes",
+    "parking": "Assigned/garage (confirm)",
+    "notes": "High-end, close to downtown Evanston."
+  },
+  {
+    "name": "The Reserve at Evanston",
+    "address": "1930 Ridge Ave, Evanston, IL 60201",
+    "lat": 42.0504,
+    "lng": -87.6867,
+    "one_bed_price": "Starting ~$2,425 (guide)",
+    "ac": "Likely yes (confirm)",
+    "parking": "Heated private garage (guide)",
+    "notes": "About a 15-min walk to campus (guide)."
+  }
+]
