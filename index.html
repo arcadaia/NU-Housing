@@ -5,21 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Northwestern Housing Finder</title>
 
+  <!-- Favicon -->
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <!-- Optional PNG fallback -->
+  <link rel="icon" href="./favicon.png" type="image/png">
+
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Leaflet -->
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+  <!-- Main Styles -->
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
   <div class="app">
 
+    <!-- Map Area -->
     <div class="mapWrap">
       <div id="map"></div>
 
+      <!-- Floating Title -->
       <div class="topbar">
         <div class="topbar-inner">
           <div class="title">Northwestern Housing Finder</div>
@@ -28,13 +36,14 @@
       </div>
     </div>
 
+    <!-- Side Panel -->
     <aside id="panel" class="panel hidden" aria-hidden="true">
       <div class="panel-header">
         <div>
           <div id="panelTitle" class="panel-title">Apartment</div>
           <div id="panelAddress" class="panel-address"></div>
         </div>
-        <button id="panelClose" class="panel-close">×</button>
+        <button id="panelClose" class="panel-close" aria-label="Close panel">×</button>
       </div>
 
       <div id="panelBody" class="panel-body"></div>
@@ -42,7 +51,10 @@
 
   </div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Main Script -->
   <script src="./script.js"></script>
 </body>
 </html>
