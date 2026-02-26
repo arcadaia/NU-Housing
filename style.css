@@ -1,88 +1,162 @@
 html, body {
-  margin: 0;
   height: 100%;
+  margin: 0;
 }
 
 .app {
-  display: flex;
   height: 100vh;
   width: 100vw;
+  display: flex;
+  overflow: hidden;
 }
 
-.map {
+/* Left side: map */
+.mapWrap {
+  position: relative;
   flex: 1;
-  transition: width 0.3s ease;
+  min-width: 0; /* important for flex + overflow */
 }
 
-/* Panel hidden */
+#map {
+  height: 100%;
+  width: 100%;
+}
+
+/* Title centered on the map area (not the whole window) */
+.topbar {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  pointer-events: none;
+}
+
+.topbar-inner {
+  pointer-events: auto;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 12px;
+  padding: 10px 16px;
+  text-align: center;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.16);
+  backdrop-filter: blur(8px);
+}
+
+.title {
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: rgba(0,0,0,0.60);
+  margin-top: 4px;
+}
+
+/* Right side panel */
 .panel {
-  width: 420px;
+  width: 440px;
+  margin: 14px 14px 14px 0;           /* not full height */
+  height: calc(100vh - 28px);
+  border-radius: 16px;
   background: #fff;
-  border-left: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0,0,0,0.10);
+  box-shadow: 0 28px 80px rgba(0,0,0,0.25);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-/* When hidden, collapse width */
 .panel.hidden {
-  width: 0;
-  overflow: hidden;
+  display: none; /* full map when closed */
 }
 
 .panel-header {
   padding: 18px;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
+  border-bottom: 1px solid rgba(0,0,0,0.10);
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .panel-title {
   font-weight: 900;
   font-size: 18px;
+  line-height: 1.15;
 }
 
 .panel-address {
   font-size: 13px;
-  color: rgba(0,0,0,0.6);
-  margin-top: 4px;
+  color: rgba(0,0,0,0.60);
+  margin-top: 6px;
+  line-height: 1.25;
 }
 
 .panel-close {
-  font-size: 22px;
-  border: none;
-  background: #f2f2f2;
-  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: #f4f4f4;
+  border-radius: 10px;
   cursor: pointer;
-  width: 38px;
-  height: 38px;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.panel-close:hover {
+  background: #eaeaea;
 }
 
 .panel-body {
   padding: 18px;
-  overflow-y: auto;
+  overflow: auto;
 }
 
+/* Nice content cards */
 .card {
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 12px;
   padding: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .section-title {
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
-  margin-bottom: 10px;
-  color: rgba(0,0,0,0.5);
+  letter-spacing: 0.03em;
+  color: rgba(0,0,0,0.55);
+  margin-bottom: 12px;
 }
 
 .kv {
   display: grid;
   grid-template-columns: 120px 1fr;
-  gap: 6px 12px;
+  gap: 8px 12px;
 }
 
-.k { color: rgba(0,0,0,0.6); }
-.v { font-weight: 700; }
+.k {
+  color: rgba(0,0,0,0.55);
+}
+
+.v {
+  font-weight: 800;
+}
+
+.links a {
+  display: inline-block;
+  margin-right: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 13px;
+  border: 1px solid rgba(0,0,0,0.10);
+}
+
+.links a:hover {
+  background: rgba(0,0,0,0.05);
+}
