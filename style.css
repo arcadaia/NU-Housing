@@ -368,14 +368,6 @@ body.topbar-shrink .subtitle {
   transform: scale(1.15);
 }
 
-/* Marker fade-in */
-.marker-fade-in {
-  opacity: 1 !important;
-}
-.leaflet-marker-icon {
-  opacity: 0;
-}
-
 /* Compare-selected marker */
 .compare-selected {
   filter: brightness(1.25) saturate(1.1);
