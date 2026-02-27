@@ -275,7 +275,8 @@ async function loadNotes(id) {
 // ==============================
 
 sortSelect.addEventListener("change", () => {
-  sortMode = sortSelect.value === "cheapest" ? "cheapest" : "distance";
+  sortMode = sortSelect.value;
+  applySort();
 });
 
 // ==============================
