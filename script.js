@@ -216,23 +216,33 @@ function openPanel(apt) {
   loadNotes(aptKey(apt));
 
   document.getElementById("saveNoteBtn").onclick = () => {
+    const saveBtn = document.getElementById("saveNoteBtn");
     const textEl = document.getElementById("newNoteText");
-    const text = textEl.value.trim();
-    if (!text) return;
-  
-    db.collection("notes").add({
-      apartment: aptKey(apt),
-      text,
-      created: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-      textEl.value = "";
-      loadNotes(aptKey(apt));
-    })
-    .catch(err => {
-      console.error("Save note error:", err);
-    });
-  };
+    
+    saveBtn.onclick = async () => {
+      const text = textEl.value.trim();
+      if (!text) return;
+    
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+    
+      try {
+        await db.collection("notes").add({
+          apartment: aptKey(apt),
+          text,
+          created: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    
+        textEl.value = "";
+        await loadNotes(aptKey(apt));
+      } catch (err) {
+        console.error("Save note error:", err);
+        alert("Save failed. Open Console to see the error (likely Firestore permissions).");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save Note";
+      }
+    };
 
   panel.classList.remove("hidden");
 }
@@ -244,20 +254,17 @@ panelClose.onclick = () => {
 
 function loadNotes(key) {
   const container = document.getElementById("notesContainer");
-  if (!container) return;
+  if (!container) return Promise.resolve();
 
   container.innerHTML = "";
 
-  db.collection("notes")
+  return db.collection("notes")
     .where("apartment", "==", key)
     .get()
     .then(snapshot => {
-
       const notes = [];
 
-      snapshot.forEach(doc => {
-        notes.push(doc.data());
-      });
+      snapshot.forEach(doc => notes.push(doc.data()));
 
       notes.sort((a, b) => {
         if (!a.created || !b.created) return 0;
@@ -270,7 +277,6 @@ function loadNotes(key) {
         div.textContent = note.text;
         container.appendChild(div);
       });
-
     })
     .catch(err => {
       console.error("Notes load error:", err);
