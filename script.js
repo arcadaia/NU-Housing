@@ -23,7 +23,6 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
 }).addTo(map);
 
-// Campus marker
 L.circleMarker([NU.lat, NU.lng], {
   radius: 6,
   color: "#4e2a84",
@@ -48,16 +47,19 @@ const panelAddress = document.getElementById("panelAddress");
 const panelBody = document.getElementById("panelBody");
 const panelClose = document.getElementById("panelClose");
 
-const sortSelect = document.getElementById("sortSelect");
 const compareToggleBtn = document.getElementById("compareToggleBtn");
 const compareOpenBtn = document.getElementById("compareOpenBtn");
 const compareClearBtn = document.getElementById("compareClearBtn");
+
+const sortModeSelect = document.getElementById("sortModeSelect");
+const applySortBtn = document.getElementById("applySortBtn");
+const selectedListEl = document.getElementById("selectedList");
 
 const compareModal = document.getElementById("compareModal");
 const compareBackdrop = document.getElementById("compareBackdrop");
 const compareCloseBtn = document.getElementById("compareCloseBtn");
 
-// Compare fields (MATCH YOUR HTML IDs)
+// Compare fields
 const cmpA_name = document.getElementById("cmpA_name");
 const cmpA_addr = document.getElementById("cmpA_addr");
 const cmpA_dist = document.getElementById("cmpA_dist");
@@ -103,8 +105,7 @@ function parsePriceToNumber(priceStr) {
   if (!priceStr || typeof priceStr !== "string") return null;
   const m = priceStr.match(/(\d{1,3}(?:,\d{3})+|\d{3,6})/);
   if (!m) return null;
-  const n = Number(m[1].replaceAll(",", ""));
-  return Number.isFinite(n) ? n : null;
+  return Number(m[1].replaceAll(",", ""));
 }
 
 function aptKey(apt) {
@@ -118,167 +119,44 @@ function aptKey(apt) {
 let apartments = [];
 let activeMarker = null;
 let selectedKeys = [];
-
-let sortMode = "distance";
 let compareMode = false;
-let compareSelection = []; // array of keys (addresses)
+let compareSelection = [];
 
-const aptIndex = new Map(); // key -> { apt, marker }
-
-// ==============================
-// PANEL
-// ==============================
-
-async function openPanel(apt) {
-  const dist = apt.distance.toFixed(2);
-  const rank = `${apt.rank}${ordinal(apt.rank)} closest`;
-
-  panelTitle.textContent = apt.name || "Apartment";
-  panelAddress.textContent = apt.address || "";
-
-  panelBody.innerHTML = `
-    <div class="card">
-      <div class="section-title">Overview</div>
-
-      <div class="kv-row">
-        <div class="kv-item">
-          <div class="kv-label">Distance</div>
-          <div class="kv-value">${dist} mi (${rank})</div>
-        </div>
-      </div>
-
-      <div class="kv-row">
-        <div class="kv-item">
-          <div class="kv-label">1BR</div>
-          <div class="kv-value">${apt.one_bed_price || "TBD"}</div>
-        </div>
-
-        <div class="kv-item">
-          <div class="kv-label">AC</div>
-          <div class="kv-value">${apt.ac || "TBD"}</div>
-        </div>
-      </div>
-
-      <div class="kv-row">
-        <div class="kv-item">
-          <div class="kv-label">Parking</div>
-          <div class="kv-value">${apt.parking || "TBD"}</div>
-        </div>
-
-        <div class="kv-item">
-          <div class="kv-label">Cheapest est.</div>
-          <div class="kv-value">${apt.priceNum ? `$${apt.priceNum.toLocaleString()}` : "—"}</div>
-        </div>
-      </div>
-
-      ${apt.website ? `
-        <div class="button-wrap">
-          <a href="${apt.website}" target="_blank" rel="noopener noreferrer" class="primary-btn">
-            View property website
-          </a>
-        </div>
-      ` : ""}
-    </div>
-
-    <div class="card">
-      <div class="section-title">Sticky Notes</div>
-
-      <div id="notesContainer"></div>
-
-      <textarea id="newNoteText" placeholder="Leave a note..."></textarea>
-      <button id="addNoteBtn" class="primary-btn" type="button">Add Note</button>
-    </div>
-  `;
-
-  panel.classList.remove("hidden");
-  panel.setAttribute("aria-hidden", "false");
-  document.body.classList.add("panel-open");
-
-  await loadNotes(aptKey(apt));
-  wireNoteSubmit(apt);
-
-  panelBody.removeEventListener("scroll", onPanelScroll);
-  panelBody.addEventListener("scroll", onPanelScroll);
-}
-
-function closePanel() {
-  panel.classList.add("hidden");
-  panel.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("panel-open");
-  document.body.classList.remove("topbar-shrink");
-
-  if (activeMarker) {
-    const el = activeMarker.getElement();
-    if (el) el.classList.remove("selected-marker");
-    activeMarker = null;
-  }
-}
-
-panelClose.addEventListener("click", closePanel);
-
-function onPanelScroll() {
-  const y = panelBody.scrollTop || 0;
-  if (y > 10) document.body.classList.add("topbar-shrink");
-  else document.body.classList.remove("topbar-shrink");
-}
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    if (!compareModal.classList.contains("hidden")) closeCompare();
-    else closePanel();
-  }
-});
+const aptIndex = new Map();
+let markerLayer = L.layerGroup().addTo(map);
 
 // ==============================
-// NOTES
+// SELECTED LIST
 // ==============================
 
-function wireNoteSubmit(apt) {
-  const btn = document.getElementById("addNoteBtn");
-  const textArea = document.getElementById("newNoteText");
-  if (!btn || !textArea) return;
+function updateSelectedList() {
+  selectedListEl.innerHTML = "";
 
-  btn.onclick = async () => {
-    const text = (textArea.value || "").trim();
-    if (!text) return;
+  selectedKeys.forEach(key => {
+    const entry = aptIndex.get(key);
+    if (!entry) return;
 
-    await db.collection("comments").add({
-      apartmentId: aptKey(apt),
-      text,
-      createdAt: Date.now()
-    });
-
-    textArea.value = "";
-    await loadNotes(aptKey(apt));
-  };
-}
-
-async function loadNotes(id) {
-  const container = document.getElementById("notesContainer");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  const snapshot = await db.collection("comments")
-    .where("apartmentId", "==", id)
-    .get();
-
-  snapshot.forEach(doc => {
     const div = document.createElement("div");
-    div.className = "sticky-note";
-    div.textContent = doc.data().text || "";
-    container.appendChild(div);
+    div.className = "selected-item";
+    div.innerHTML = `
+      <span>${entry.apt.name}</span>
+      <button data-key="${key}">×</button>
+    `;
+
+    div.querySelector("button").onclick = (e) => {
+      const k = e.target.dataset.key;
+
+      selectedKeys = selectedKeys.filter(x => x !== k);
+      compareSelection = compareSelection.filter(x => x !== k);
+      aptIndex.get(k)?.marker?.getElement()?.classList.remove("compare-selected");
+
+      updateSelectedList();
+      updateCompareButtons();
+    };
+
+    selectedListEl.appendChild(div);
   });
 }
-
-// ==============================
-// SORTING
-// ==============================
-
-sortSelect.addEventListener("change", () => {
-  sortMode = sortSelect.value;
-  applySort();
-});
 
 // ==============================
 // COMPARE MODE
@@ -286,7 +164,8 @@ sortSelect.addEventListener("change", () => {
 
 function setCompareMode(on) {
   compareMode = !!on;
-  compareToggleBtn.textContent = compareMode ? "Compare mode: On" : "Compare mode: Off";
+  compareToggleBtn.textContent =
+    compareMode ? "Compare mode: On" : "Compare mode: Off";
 }
 
 function updateCompareButtons() {
@@ -295,33 +174,19 @@ function updateCompareButtons() {
   compareClearBtn.disabled = compareSelection.length === 0;
 }
 
-function clearCompareSelection() {
-  // Remove marker highlight class
-  compareSelection.forEach((key) => {
-    const m = aptIndex.get(key)?.marker;
-    const el = m?.getElement();
-    if (el) el.classList.remove("compare-selected");
-  });
-
-  compareSelection = [];
-  updateCompareButtons();
-}
-
 function toggleCompareSelection(apt) {
   const key = aptKey(apt);
-  const entry = aptIndex.get(key);
-  const marker = entry?.marker;
+  const marker = aptIndex.get(key)?.marker;
 
   const idx = compareSelection.indexOf(key);
+
   if (idx >= 0) {
     compareSelection.splice(idx, 1);
     marker?.getElement()?.classList.remove("compare-selected");
   } else {
     if (compareSelection.length >= 2) {
-      // remove oldest
       const oldKey = compareSelection.shift();
-      const oldMarker = aptIndex.get(oldKey)?.marker;
-      oldMarker?.getElement()?.classList.remove("compare-selected");
+      aptIndex.get(oldKey)?.marker?.getElement()?.classList.remove("compare-selected");
     }
     compareSelection.push(key);
     marker?.getElement()?.classList.add("compare-selected");
@@ -330,90 +195,48 @@ function toggleCompareSelection(apt) {
   updateCompareButtons();
 }
 
-compareToggleBtn.addEventListener("click", () => {
-  setCompareMode(!compareMode);
-});
+compareToggleBtn.onclick = () => setCompareMode(!compareMode);
+compareClearBtn.onclick = () => {
+  compareSelection.forEach(key => {
+    aptIndex.get(key)?.marker?.getElement()?.classList.remove("compare-selected");
+  });
+  compareSelection = [];
+  updateCompareButtons();
+};
 
-compareClearBtn.addEventListener("click", () => {
-  clearCompareSelection();
-});
-
-compareOpenBtn.addEventListener("click", () => {
+compareOpenBtn.onclick = () => {
   if (compareSelection.length !== 2) return;
   openCompare(compareSelection[0], compareSelection[1]);
-});
-
-function openCompare(keyA, keyB) {
-  const a = aptIndex.get(keyA)?.apt;
-  const b = aptIndex.get(keyB)?.apt;
-  if (!a || !b) return;
-
-  fillCompareColumn("A", a);
-  fillCompareColumn("B", b);
-
-  compareModal.classList.remove("hidden");
-  compareModal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("modal-open");
-}
-
-function closeCompare() {
-  compareModal.classList.add("hidden");
-  compareModal.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("modal-open");
-}
-
-compareBackdrop.addEventListener("click", closeCompare);
-compareCloseBtn.addEventListener("click", closeCompare);
-
-function fillCompareColumn(which, apt) {
-  const dist = `${apt.distance.toFixed(2)} mi`;
-  const rank = `${apt.rank}${ordinal(apt.rank)} closest`;
-
-  const price = apt.one_bed_price || "TBD";
-  const ac = apt.ac || "TBD";
-  const parking = apt.parking || "TBD";
-  const link = apt.website || "";
-
-  if (which === "A") {
-    cmpA_name.textContent = apt.name || "—";
-    cmpA_addr.textContent = apt.address || "—";
-    cmpA_dist.textContent = dist;
-    cmpA_rank.textContent = rank;
-    cmpA_price.textContent = price;
-    cmpA_ac.textContent = ac;
-    cmpA_parking.textContent = parking;
-
-    if (link) {
-      cmpA_link.href = link;
-      cmpA_link.style.display = "inline-block";
-    } else {
-      cmpA_link.href = "#";
-      cmpA_link.style.display = "none";
-    }
-  } else {
-    cmpB_name.textContent = apt.name || "—";
-    cmpB_addr.textContent = apt.address || "—";
-    cmpB_dist.textContent = dist;
-    cmpB_rank.textContent = rank;
-    cmpB_price.textContent = price;
-    cmpB_ac.textContent = ac;
-    cmpB_parking.textContent = parking;
-
-    if (link) {
-      cmpB_link.href = link;
-      cmpB_link.style.display = "inline-block";
-    } else {
-      cmpB_link.href = "#";
-      cmpB_link.style.display = "none";
-    }
-  }
-}
+};
 
 // ==============================
-// LOAD APARTMENTS + MARKERS
+// SORT SELECTED LIST ONLY
 // ==============================
 
-let markerLayer = L.layerGroup().addTo(map);
+applySortBtn.onclick = () => {
+  if (selectedKeys.length === 0) return;
+
+  const mode = sortModeSelect.value;
+
+  selectedKeys.sort((aKey, bKey) => {
+    const a = aptIndex.get(aKey).apt;
+    const b = aptIndex.get(bKey).apt;
+
+    if (mode === "cheapest") {
+      if (a.priceNum == null) return 1;
+      if (b.priceNum == null) return -1;
+      return a.priceNum - b.priceNum;
+    }
+
+    return a.distance - b.distance;
+  });
+
+  updateSelectedList();
+};
+
+// ==============================
+// LOAD + MARKERS
+// ==============================
 
 function renderMarkers() {
   markerLayer.clearLayers();
@@ -423,22 +246,15 @@ function renderMarkers() {
     const marker = L.marker([apt.lat, apt.lng], { icon: defaultIcon })
       .addTo(markerLayer);
 
-    setTimeout(() => {
-      marker.getElement()?.classList.add("marker-fade-in");
-    }, 0);
-
     const key = aptKey(apt);
     aptIndex.set(key, { apt, marker });
 
     marker.on("click", () => {
-
-      const key = aptKey(apt);
-      
       if (!selectedKeys.includes(key)) {
         selectedKeys.push(key);
         updateSelectedList();
-      } 
-      
+      }
+
       if (compareMode) {
         toggleCompareSelection(apt);
         return;
@@ -457,33 +273,10 @@ function renderMarkers() {
       openPanel(apt);
     });
   });
-
-  updateCompareButtons();
-}
-
-function applySort() {
-  if (sortMode === "cheapest") {
-    apartments.sort((a, b) => {
-      if (a.priceNum == null) return 1;
-      if (b.priceNum == null) return -1;
-      return a.priceNum - b.priceNum;
-    });
-  } else {
-    apartments.sort((a, b) => a.distance - b.distance);
-  }
-
-  apartments.forEach((apt, i) => {
-    apt.rank = i + 1;
-  });
-
-  renderMarkers();
 }
 
 fetch("./apartments.json")
-  .then(res => {
-    if (!res.ok) throw new Error("Failed to load apartments.json");
-    return res.json();
-  })
+  .then(res => res.json())
   .then(data => {
     apartments = data;
 
@@ -494,9 +287,5 @@ fetch("./apartments.json")
       apt.priceNum = parsePriceToNumber(apt.one_bed_price);
     });
 
-    applySort();
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Could not load apartments.json");
+    renderMarkers();
   });
