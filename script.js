@@ -117,6 +117,7 @@ function aptKey(apt) {
 
 let apartments = [];
 let activeMarker = null;
+let selectedKeys = [];
 
 let sortMode = "distance";
 let compareMode = false;
@@ -431,6 +432,13 @@ function renderMarkers() {
 
     marker.on("click", () => {
 
+      const key = aptKey(apt);
+      
+      if (!selectedKeys.includes(key)) {
+        selectedKeys.push(key);
+        updateSelectedList();
+      } 
+      
       if (compareMode) {
         toggleCompareSelection(apt);
         return;
