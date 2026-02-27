@@ -54,6 +54,7 @@ const compareClearBtn = document.getElementById("compareClearBtn");
 const sortModeSelect = document.getElementById("sortModeSelect");
 const applySortBtn = document.getElementById("applySortBtn");
 const selectedListEl = document.getElementById("selectedList");
+const clearListBtn = document.getElementById("clearListBtn");
 
 const compareModal = document.getElementById("compareModal");
 const compareBackdrop = document.getElementById("compareBackdrop");
@@ -95,10 +96,6 @@ function milesBetween(lat1, lon1, lat2, lon2) {
     Math.sin(dLon / 2) ** 2;
 
   return 2 * R * Math.asin(Math.sqrt(a));
-}
-
-function ordinal(n) {
-  return n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
 }
 
 function parsePriceToNumber(priceStr) {
@@ -158,6 +155,70 @@ function updateSelectedList() {
   });
 }
 
+clearListBtn?.addEventListener("click", () => {
+  selectedKeys = [];
+  updateSelectedList();
+});
+
+// ==============================
+// PANEL
+// ==============================
+
+function openPanel(apt) {
+  panelTitle.textContent = apt.name || "Apartment";
+  panelAddress.textContent = apt.address || "";
+
+  panelBody.innerHTML = `
+    <div class="card">
+      <div class="section-title">Overview</div>
+
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">Distance</div>
+          <div class="kv-value">${apt.distance.toFixed(2)} mi</div>
+        </div>
+      </div>
+
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">1BR</div>
+          <div class="kv-value">${apt.one_bed_price || "TBD"}</div>
+        </div>
+      </div>
+
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">AC</div>
+          <div class="kv-value">${apt.ac || "TBD"}</div>
+        </div>
+      </div>
+
+      <div class="kv-row">
+        <div class="kv-item">
+          <div class="kv-label">Parking</div>
+          <div class="kv-value">${apt.parking || "TBD"}</div>
+        </div>
+      </div>
+
+      ${
+        apt.website
+          ? `<div class="button-wrap">
+              <a href="${apt.website}" target="_blank" class="primary-btn">
+                View property website
+              </a>
+            </div>`
+          : ""
+      }
+    </div>
+  `;
+
+  panel.classList.remove("hidden");
+}
+
+panelClose.onclick = () => {
+  panel.classList.add("hidden");
+};
+
 // ==============================
 // COMPARE MODE
 // ==============================
@@ -196,6 +257,7 @@ function toggleCompareSelection(apt) {
 }
 
 compareToggleBtn.onclick = () => setCompareMode(!compareMode);
+
 compareClearBtn.onclick = () => {
   compareSelection.forEach(key => {
     aptIndex.get(key)?.marker?.getElement()?.classList.remove("compare-selected");
@@ -250,6 +312,7 @@ function renderMarkers() {
     aptIndex.set(key, { apt, marker });
 
     marker.on("click", () => {
+
       if (!selectedKeys.includes(key)) {
         selectedKeys.push(key);
         updateSelectedList();
@@ -257,7 +320,6 @@ function renderMarkers() {
 
       if (compareMode) {
         toggleCompareSelection(apt);
-        return;
       }
 
       if (activeMarker) {
@@ -273,6 +335,8 @@ function renderMarkers() {
       openPanel(apt);
     });
   });
+
+  updateCompareButtons();
 }
 
 fetch("./apartments.json")
