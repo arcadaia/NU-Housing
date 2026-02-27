@@ -411,6 +411,65 @@ function fillCompareColumn(which, apt) {
 // LOAD APARTMENTS + MARKERS
 // ==============================
 
+let markerLayer = L.layerGroup().addTo(map);
+
+function renderMarkers() {
+  markerLayer.clearLayers();
+  aptIndex.clear();
+
+  apartments.forEach(apt => {
+    const marker = L.marker([apt.lat, apt.lng], { icon: defaultIcon })
+      .addTo(markerLayer);
+
+    setTimeout(() => {
+      marker.getElement()?.classList.add("marker-fade-in");
+    }, 0);
+
+    const key = aptKey(apt);
+    aptIndex.set(key, { apt, marker });
+
+    marker.on("click", () => {
+
+      if (compareMode) {
+        toggleCompareSelection(apt);
+        return;
+      }
+
+      if (activeMarker) {
+        activeMarker.getElement()?.classList.remove("selected-marker");
+      }
+
+      activeMarker = marker;
+      setTimeout(() =>
+        marker.getElement()?.classList.add("selected-marker"), 10
+      );
+
+      map.flyTo([apt.lat, apt.lng], 16, { duration: 0.6 });
+      openPanel(apt);
+    });
+  });
+
+  updateCompareButtons();
+}
+
+function applySort() {
+  if (sortMode === "cheapest") {
+    apartments.sort((a, b) => {
+      if (a.priceNum == null) return 1;
+      if (b.priceNum == null) return -1;
+      return a.priceNum - b.priceNum;
+    });
+  } else {
+    apartments.sort((a, b) => a.distance - b.distance);
+  }
+
+  apartments.forEach((apt, i) => {
+    apt.rank = i + 1;
+  });
+
+  renderMarkers();
+}
+
 fetch("./apartments.json")
   .then(res => {
     if (!res.ok) throw new Error("Failed to load apartments.json");
@@ -419,7 +478,6 @@ fetch("./apartments.json")
   .then(data => {
     apartments = data;
 
-    // Compute distance + rank (distance-based rank)
     apartments.forEach(apt => {
       apt.lat = Number(apt.lat);
       apt.lng = Number(apt.lng);
@@ -427,41 +485,7 @@ fetch("./apartments.json")
       apt.priceNum = parsePriceToNumber(apt.one_bed_price);
     });
 
-    apartments.sort((a, b) => a.distance - b.distance);
-    apartments.forEach((apt, i) => apt.rank = i + 1);
-
-    // Create markers
-    apartments.forEach(apt => {
-      const marker = L.marker([apt.lat, apt.lng], { icon: defaultIcon }).addTo(map);
-
-      // Fade-in
-      setTimeout(() => {
-        marker.getElement()?.classList.add("marker-fade-in");
-      }, 0);
-
-      const key = aptKey(apt);
-      aptIndex.set(key, { apt, marker });
-
-      marker.on("click", () => {
-        // Compare mode: select instead of opening panel
-        if (compareMode) {
-          toggleCompareSelection(apt);
-          return;
-        }
-
-        // Normal: highlight marker and open panel
-        if (activeMarker) {
-          activeMarker.getElement()?.classList.remove("selected-marker");
-        }
-        activeMarker = marker;
-        setTimeout(() => marker.getElement()?.classList.add("selected-marker"), 10);
-
-        map.flyTo([apt.lat, apt.lng], 16, { duration: 0.6 });
-        openPanel(apt);
-      });
-    });
-
-    updateCompareButtons();
+    applySort();
   })
   .catch(err => {
     console.error(err);
