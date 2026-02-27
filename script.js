@@ -299,6 +299,40 @@ applySortBtn.onclick = () => {
 // ==============================
 // LOAD + MARKERS
 // ==============================
+function openCompare(keyA, keyB) {
+  const a = aptIndex.get(keyA)?.apt;
+  const b = aptIndex.get(keyB)?.apt;
+  if (!a || !b) return;
+
+  // Fill A
+  cmpA_name.textContent = a.name;
+  cmpA_addr.textContent = a.address;
+  cmpA_dist.textContent = a.distance.toFixed(2) + " mi";
+  cmpA_price.textContent = a.one_bed_price || "TBD";
+  cmpA_ac.textContent = a.ac || "TBD";
+  cmpA_parking.textContent = a.parking || "TBD";
+  cmpA_link.href = a.website || "#";
+
+  // Fill B
+  cmpB_name.textContent = b.name;
+  cmpB_addr.textContent = b.address;
+  cmpB_dist.textContent = b.distance.toFixed(2) + " mi";
+  cmpB_price.textContent = b.one_bed_price || "TBD";
+  cmpB_ac.textContent = b.ac || "TBD";
+  cmpB_parking.textContent = b.parking || "TBD";
+  cmpB_link.href = b.website || "#";
+
+  compareModal.classList.remove("hidden");
+  compareBackdrop.classList.remove("hidden");  // 🔥 this restores blur
+}
+
+compareCloseBtn.onclick = closeCompare;
+compareBackdrop.onclick = closeCompare;
+
+function closeCompare() {
+  compareModal.classList.add("hidden");
+  compareBackdrop.classList.add("hidden");  // 🔥 remove blur
+}
 
 function renderMarkers() {
   markerLayer.clearLayers();
