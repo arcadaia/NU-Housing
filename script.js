@@ -119,6 +119,27 @@ let compareSelection = [];
 const aptIndex = new Map();
 let markerLayer = L.layerGroup().addTo(map);
 
+applySortBtn.onclick = () => {
+  if (selectedKeys.length === 0) return;
+
+  const mode = sortModeSelect.value;
+
+  selectedKeys.sort((aKey, bKey) => {
+    const a = aptIndex.get(aKey).apt;
+    const b = aptIndex.get(bKey).apt;
+
+    if (mode === "cheapest") {
+      if (a.priceNum == null) return 1;
+      if (b.priceNum == null) return -1;
+      return a.priceNum - b.priceNum;
+    }
+
+    return a.distance - b.distance;
+  });
+
+  updateSelectedList();
+};
+
 // ==============================
 // SELECTED LIST
 // ==============================
@@ -195,16 +216,21 @@ function openPanel(apt) {
   loadNotes(aptKey(apt));
 
   document.getElementById("saveNoteBtn").onclick = () => {
-    const text = document.getElementById("newNoteText").value.trim();
+    const textEl = document.getElementById("newNoteText");
+    const text = textEl.value.trim();
     if (!text) return;
-
+  
     db.collection("notes").add({
       apartment: aptKey(apt),
       text,
       created: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-      document.getElementById("newNoteText").value = "";
+    })
+    .then(() => {
+      textEl.value = "";
       loadNotes(aptKey(apt));
+    })
+    .catch(err => {
+      console.error("Save note error:", err);
     });
   };
 
@@ -218,19 +244,36 @@ panelClose.onclick = () => {
 
 function loadNotes(key) {
   const container = document.getElementById("notesContainer");
+  if (!container) return;
+
   container.innerHTML = "";
 
   db.collection("notes")
     .where("apartment", "==", key)
-    .orderBy("created", "desc")
     .get()
     .then(snapshot => {
+
+      const notes = [];
+
       snapshot.forEach(doc => {
+        notes.push(doc.data());
+      });
+
+      notes.sort((a, b) => {
+        if (!a.created || !b.created) return 0;
+        return b.created.seconds - a.created.seconds;
+      });
+
+      notes.forEach(note => {
         const div = document.createElement("div");
         div.className = "sticky-note";
-        div.textContent = doc.data().text;
+        div.textContent = note.text;
         container.appendChild(div);
       });
+
+    })
+    .catch(err => {
+      console.error("Notes load error:", err);
     });
 }
 
