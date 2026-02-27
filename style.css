@@ -31,7 +31,7 @@ html, body {
   width: 100%;
 }
 
-/* Blur when panel or modal open */
+/* Blur overlay */
 .mapWrap::after {
   content: "";
   position: absolute;
@@ -56,11 +56,9 @@ body.modal-open .mapWrap::after {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  pointer-events: none;
 }
 
 .topbar-inner {
-  pointer-events: auto;
   background: white;
   padding: 18px 22px;
   border-radius: 20px;
@@ -97,8 +95,6 @@ body.modal-open .mapWrap::after {
   flex-direction: column;
   gap: 22px;
 }
-
-/* ---------- LIST SECTION ---------- */
 
 .section-title {
   font-size: 12px;
@@ -141,8 +137,6 @@ body.modal-open .mapWrap::after {
   color: #4e2a84;
 }
 
-/* ---------- SORT SECTION ---------- */
-
 .sort-section {
   display: flex;
   gap: 8px;
@@ -151,7 +145,6 @@ body.modal-open .mapWrap::after {
 
 #sortModeSelect {
   flex: 1;
-  appearance: none;
   border-radius: 14px;
   border: 1px solid #eee;
   padding: 10px 14px;
@@ -160,14 +153,6 @@ body.modal-open .mapWrap::after {
   font-weight: 600;
   cursor: pointer;
 }
-
-#sortModeSelect:focus {
-  outline: none;
-  border-color: #bfa8ff;
-  box-shadow: 0 0 0 3px rgba(191,168,255,0.2);
-}
-
-/* ================= BUTTON SYSTEM ================= */
 
 button {
   font-family: inherit;
@@ -177,14 +162,8 @@ button {
   padding: 10px 14px;
   border: 1px solid #eee;
   background: #faf9fd;
-  color: #2d2d2d;
   cursor: pointer;
   transition: 0.18s ease;
-}
-
-button:hover {
-  transform: translateY(-1px);
-  border-color: #dfd7f5;
 }
 
 button.primary {
@@ -195,7 +174,6 @@ button.primary {
 
 button.primary:hover {
   background: #6b46c1;
-  border-color: #6b46c1;
 }
 
 button.subtle {
@@ -204,29 +182,9 @@ button.subtle {
   color: #777;
 }
 
-button.subtle:hover {
-  background: #f4f2fa;
-}
-
 button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: none;
-}
-
-/* ---------- COMPARE SECTION ---------- */
-
-.compare-controls {
-  border-top: 1px solid #f0f0f0;
-  padding-top: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-}
-
-.compare-controls button {
-  width: 100%;
 }
 
 /* ================= PANEL ================= */
@@ -266,151 +224,92 @@ button:disabled {
   color: #666;
 }
 
-.panel-close {
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #aaa;
-}
-
-.panel-close:hover {
-  color: #4e2a84;
-}
-
 .panel-body {
   padding: 32px;
   overflow-y: auto;
 }
 
+.card {
+  background: #faf9fd;
+  border-radius: 20px;
+  padding: 26px;
+  border: 1px solid #eee;
+}
+
+.kv-row {
+  margin-bottom: 18px;
+}
+
+.kv-label {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.kv-value {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.primary-btn {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #4e2a84;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ================= COMPARE MODAL ================= */
+
+.compare-modal.hidden {
+  display: none;
+}
+
+.compare-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+.compare-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20,16,30,0.35);
+  backdrop-filter: blur(8px);
+}
+
+.compare-card {
+  position: relative;
+  width: min(960px, calc(100vw - 40px));
+  margin: 80px auto;
+  background: white;
+  border-radius: 22px;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+
+.compare-body {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+}
+
+.compare-divider {
+  background: #eee;
+}
+
+.compare-col {
+  padding: 22px;
+}
+
 /* ================= MARKERS ================= */
 
-.leaflet-marker-icon {
-  outline: none !important;
-  border: none !important;
-  transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-.leaflet-marker-icon:hover {
-  transform: scale(1.12);
-}
-
-/* white glow */
 .selected-marker {
   filter: drop-shadow(0 0 12px rgba(255,255,255,0.9));
 }
 
 .compare-selected {
   filter: drop-shadow(0 0 16px rgba(255,255,255,1));
-}
-
-/* ================= MOBILE ================= */
-
-@media (max-width: 840px) {
-  .panel {
-    width: min(92vw, 460px);
-  }
-
-  .sidebar-section {
-    width: min(92vw, 340px);
-  }
-}
-
-/* ========================================================= */
-/* =============== SIDEBAR LAYOUT + COMPARE ================ */
-/* ========================================================= */
-
-/* Clean duplicate sidebar sizing */
-.sidebar-section {
-  width: 300px;
-  padding: 22px;
-  border-radius: 22px;
-  gap: 22px;
-}
-
-/* Remove old experimental blocks if still rendering */
-.compare-box,
-.control-block {
-  display: none !important;
-}
-
-/* ---------- Selected list formatting fix ---------- */
-
-#selectedList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 150px;
-  overflow-y: auto;
-  margin-bottom: 14px;
-}
-
-.selected-item {
-  border-radius: 14px !important;
-  padding: 8px 12px !important;
-}
-
-/* ---------- Sort + Clear layout fix ---------- */
-
-.sort-section {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-#sortModeSelect {
-  flex: 1;
-  border-radius: 14px;
-  border: 1px solid #eee;
-  padding: 10px 14px;
-  background: #faf9fd;
-  font-weight: 600;
-}
-
-#sortModeSelect:focus {
-  outline: none;
-  border-color: #bfa8ff;
-  box-shadow: 0 0 0 3px rgba(191,168,255,0.2);
-}
-
-#clearListBtn {
-  width: 100%;
-  margin-top: 4px;
-}
-
-/* ---------- Compare section proper alignment ---------- */
-
-.compare-controls {
-  border-top: 1px solid #f0f0f0 !important;
-  padding-top: 18px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-}
-
-.compare-controls button {
-  width: 100%;
-}
-
-/* ---------- Fix compare button visual state ---------- */
-
-#compareToggleBtn.active {
-  background: #4e2a84;
-  color: white;
-  border-color: #4e2a84;
-}
-
-/* ---------- Marker glow stronger and clean ---------- */
-
-.leaflet-marker-icon {
-  outline: none !important;
-  border: none !important;
-}
-
-.selected-marker {
-  filter: drop-shadow(0 0 14px rgba(255,255,255,0.95)) !important;
-}
-
-.compare-selected {
-  filter: drop-shadow(0 0 18px rgba(255,255,255,1)) !important;
 }
