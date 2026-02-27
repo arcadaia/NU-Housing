@@ -30,36 +30,38 @@
       </div>
 
       <div class="sidebar-section">
-        <!-- LIST CONTROLS (TOP) -->
-        <div class="list-controls">
+        <!-- LIST SECTION -->
+        <div>
           <div class="section-title">Selected</div>
       
           <div id="selectedList"></div>
       
-          <select id="sortModeSelect">
-            <option value="distance">Distance</option>
-            <option value="cheapest">Cheapest</option>
-          </select>
+          <div class="sort-section">
+            <select id="sortModeSelect">
+              <option value="distance">Distance</option>
+              <option value="cheapest">Cheapest</option>
+            </select>
       
-          <button id="applySortBtn" class="primary">
-            Sort
-          </button>
-          
+            <button id="applySortBtn" class="primary">
+              Sort
+            </button>
+          </div>
+      
           <button id="clearListBtn" class="subtle">
             Clear All
           </button>
         </div>
       
-        <!-- COMPARE CONTROLS (BOTTOM) -->
+        <!-- COMPARE SECTION -->
         <div class="compare-controls">
           <button id="compareToggleBtn" class="subtle">
             Compare mode: Off
           </button>
-          
+      
           <button id="compareOpenBtn" class="primary">
             Compare (0/2)
           </button>
-          
+      
           <button id="compareClearBtn" class="subtle">
             Clear Compare
           </button>
