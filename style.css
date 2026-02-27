@@ -370,3 +370,59 @@ button:disabled {
   margin-top: 16px;
   display: inline-block;
 }
+
+/* Sort row layout */
+.sort-section {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* Make select look like your theme */
+#sortModeSelect {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+
+  height: 40px;
+  padding: 0 40px 0 14px;
+
+  border-radius: 14px;
+  border: 1px solid #eee;
+  background: #faf9fd;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d2d2d;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  cursor: pointer;
+  line-height: 40px;
+}
+
+/* Custom arrow */
+.sort-section {
+  position: relative;
+}
+
+.sort-section::after {
+  content: "▾";
+  position: absolute;
+  left: calc(100% - 140px); /* keeps arrow inside the select, not the button */
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #7d6aa8;
+  font-size: 14px;
+}
+
+/* Focus ring */
+#sortModeSelect:focus {
+  outline: none;
+  border-color: #bfa8ff;
+  box-shadow: 0 0 0 3px rgba(191,168,255,0.2);
+}
