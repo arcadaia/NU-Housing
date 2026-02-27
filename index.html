@@ -26,30 +26,40 @@
             <div class="title">Northwestern Housing Finder</div>
             <div class="subtitle">Click a marker to explore apartments</div>
           </div>
-
-          <label class="control">
-            <span class="control-label">Sort</span>
-            <select id="sortSelect" class="control-select">
-              <option value="distance">Distance</option>
-              <option value="cheapest">Cheapest</option>
-            </select>
-          </label>
         </div>
       </div>
 
-      <div class="compare-box">
-        <button id="compareToggleBtn" class="control-btn" type="button">
-          Compare mode: Off
-        </button>
+      <div class="control-block">
 
-        <button id="compareOpenBtn" class="control-btn primary" type="button" disabled>
-          Compare (0/2)
-        </button>
-
-        <button id="compareClearBtn" class="control-btn" type="button" disabled>
-          Clear
+      <button id="compareToggleBtn" class="control-btn">
+        Compare mode: Off
+      </button>
+    
+      <div class="list-section">
+        <div class="list-title">Selected</div>
+        <div id="selectedList" class="selected-list"></div>
+      </div>
+    
+      <div class="sort-section">
+        <select id="sortModeSelect" class="control-select">
+          <option value="distance">Distance</option>
+          <option value="cheapest">Cheapest</option>
+        </select>
+    
+        <button id="applySortBtn" class="control-btn primary">
+          Sort
         </button>
       </div>
+    
+      <button id="compareOpenBtn" class="control-btn primary" disabled>
+        Compare (0/2)
+      </button>
+    
+      <button id="compareClearBtn" class="control-btn" disabled>
+        Clear
+      </button>
+    
+    </div>
 
     </div> <!-- end mapWrap -->
 
