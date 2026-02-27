@@ -288,7 +288,7 @@ button:disabled {
 }
 
 .sticky-note:hover {
-  transform: rotate(1deg) scale(1.02);
+  transform: rotate(5deg) scale(1.02);
   background: #e6d9ff;
   box-shadow: 0 12px 24px rgba(78, 42, 132, 0.18);
 }
