@@ -237,13 +237,12 @@ function openPanel(apt) {
         await loadNotes(aptKey(apt));
       } catch (err) {
         console.error("Save note error:", err);
-        alert("Save failed. Open Console to see the error (likely Firestore permissions).");
+        alert("Save failed. Check console.");
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = "Save Note";
       }
     };
-
   panel.classList.remove("hidden");
 }
 
