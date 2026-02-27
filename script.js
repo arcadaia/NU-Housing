@@ -346,25 +346,28 @@ function renderMarkers() {
     aptIndex.set(key, { apt, marker });
 
     marker.on("click", () => {
-
+    
+      if (compareMode) {
+        // ONLY compare selection
+        toggleCompareSelection(apt);
+        return; // stop here
+      }
+    
+      // ONLY add to selected list
       if (!selectedKeys.includes(key)) {
         selectedKeys.push(key);
         updateSelectedList();
       }
-
-      if (compareMode) {
-        toggleCompareSelection(apt);
-      }
-
+    
       if (activeMarker) {
         activeMarker.getElement()?.classList.remove("selected-marker");
       }
-
+    
       activeMarker = marker;
       setTimeout(() =>
         marker.getElement()?.classList.add("selected-marker"), 10
       );
-
+    
       map.flyTo([apt.lat, apt.lng], 16, { duration: 0.6 });
       openPanel(apt);
     });
