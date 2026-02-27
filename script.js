@@ -262,15 +262,6 @@ async function loadNotes(id) {
     .where("apartmentId", "==", id)
     .get();
 
-  if (snapshot.empty) {
-    const empty = document.createElement("div");
-    empty.className = "sticky-note";
-    empty.style.opacity = "0.75";
-    empty.textContent = "No notes yet. Add one above.";
-    container.appendChild(empty);
-    return;
-  }
-
   snapshot.forEach(doc => {
     const div = document.createElement("div");
     div.className = "sticky-note";
