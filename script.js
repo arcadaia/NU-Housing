@@ -275,6 +275,7 @@ function loadNotes(key) {
         const div = document.createElement("div");
         div.className = "sticky-note";
         div.textContent = note.text;
+        div.style.transform = `rotate(${(Math.random() * 2 - 1)}deg)`;
         container.appendChild(div);
       });
     })
