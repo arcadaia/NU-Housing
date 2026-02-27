@@ -278,23 +278,45 @@ body.topbar-shrink .subtitle {
   margin-top: 20px;
 }
 
-.primary-btn {
-  display: inline-block;
-  padding: 12px 20px;
-  border-radius: 12px;
-  background: #4e2a84;
-  color: white;
-  text-decoration: none;
+.sidebar-section button {
+  font-family: inherit;
+  font-size: 14px;
   font-weight: 600;
-  border: none;
+  border-radius: 14px;
+  padding: 10px 14px;
+  border: 1px solid #eee;
+  background: #faf9fd;
+  color: #2d2d2d;
   cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
+  transition: all 0.18s ease;
 }
 
-.primary-btn:hover {
+.sidebar-section button:hover {
+  transform: translateY(-1px);
+  border-color: #dfd7f5;
+}
+
+/* Primary purple button */
+.sidebar-section button.primary {
+  background: #4e2a84;
+  border-color: #4e2a84;
+  color: white;
+}
+
+.sidebar-section button.primary:hover {
   background: #6b46c1;
-  transform: translateY(-2px);
+  border-color: #6b46c1;
+}
+
+/* Destructive / clear style */
+.sidebar-section button.subtle {
+  background: transparent;
+  border: 1px solid #e8e4f3;
+  color: #777;
+}
+
+.sidebar-section button.subtle:hover {
+  background: #f4f2fa;
 }
 
 /* ================= STICKY NOTES ================= */
