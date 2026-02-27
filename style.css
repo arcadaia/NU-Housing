@@ -596,3 +596,20 @@ body.topbar-shrink .subtitle {
   display: flex;
   gap: 8px;
 }
+
+.leaflet-marker-icon {
+  outline: none !important;
+  border: none !important;
+}
+
+.leaflet-marker-icon:focus {
+  outline: none !important;
+}
+
+.selected-marker {
+  filter: drop-shadow(0 0 6px rgba(78,42,132,0.6));
+}
+
+.compare-selected {
+  filter: drop-shadow(0 0 8px rgba(155,89,182,0.8));
+}
