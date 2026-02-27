@@ -607,9 +607,9 @@ body.topbar-shrink .subtitle {
 }
 
 .selected-marker {
-  filter: drop-shadow(0 0 6px rgba(78,42,132,0.6));
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.85));
 }
 
 .compare-selected {
-  filter: drop-shadow(0 0 8px rgba(155,89,182,0.8));
+  filter: drop-shadow(0 0 12px rgba(255,255,255,1));
 }
