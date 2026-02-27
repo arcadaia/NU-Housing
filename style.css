@@ -315,3 +315,102 @@ button:disabled {
     width: min(92vw, 340px);
   }
 }
+
+/* ========================================================= */
+/* =============== SIDEBAR LAYOUT + COMPARE ================ */
+/* ========================================================= */
+
+/* Clean duplicate sidebar sizing */
+.sidebar-section {
+  width: 300px;
+  padding: 22px;
+  border-radius: 22px;
+  gap: 22px;
+}
+
+/* Remove old experimental blocks if still rendering */
+.compare-box,
+.control-block {
+  display: none !important;
+}
+
+/* ---------- Selected list formatting fix ---------- */
+
+#selectedList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+  margin-bottom: 14px;
+}
+
+.selected-item {
+  border-radius: 14px !important;
+  padding: 8px 12px !important;
+}
+
+/* ---------- Sort + Clear layout fix ---------- */
+
+.sort-section {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+#sortModeSelect {
+  flex: 1;
+  border-radius: 14px;
+  border: 1px solid #eee;
+  padding: 10px 14px;
+  background: #faf9fd;
+  font-weight: 600;
+}
+
+#sortModeSelect:focus {
+  outline: none;
+  border-color: #bfa8ff;
+  box-shadow: 0 0 0 3px rgba(191,168,255,0.2);
+}
+
+#clearListBtn {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ---------- Compare section proper alignment ---------- */
+
+.compare-controls {
+  border-top: 1px solid #f0f0f0 !important;
+  padding-top: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.compare-controls button {
+  width: 100%;
+}
+
+/* ---------- Fix compare button visual state ---------- */
+
+#compareToggleBtn.active {
+  background: #4e2a84;
+  color: white;
+  border-color: #4e2a84;
+}
+
+/* ---------- Marker glow stronger and clean ---------- */
+
+.leaflet-marker-icon {
+  outline: none !important;
+  border: none !important;
+}
+
+.selected-marker {
+  filter: drop-shadow(0 0 14px rgba(255,255,255,0.95)) !important;
+}
+
+.compare-selected {
+  filter: drop-shadow(0 0 18px rgba(255,255,255,1)) !important;
+}
