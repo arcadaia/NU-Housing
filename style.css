@@ -597,6 +597,30 @@ body.topbar-shrink .subtitle {
   gap: 8px;
 }
 
+.clear-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #f7f7f7;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.clear-btn:hover {
+  background: #eee;
+}
+
+.list-controls {
+  margin-bottom: 20px;
+}
+
+.compare-controls {
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
 .leaflet-marker-icon {
   outline: none !important;
   border: none !important;
