@@ -23,28 +23,13 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
 }).addTo(map);
 
-// ==============================
-// WALKING ZONE OVERLAY
-// ==============================
+// Force SVG so the polygon definitely renders as an SVG path
+L.svg().addTo(map);
 
-const walkingZoneCoords = [
-  [42.0644, -87.6956], // top left near Central + Ridge
-  [42.0644, -87.6720], // top right near Central + Sheridan
-  [42.0528, -87.6720], // right side upper
-  [42.0337, -87.6720], // bottom right near Lake + Sheridan
-  [42.0337, -87.6889], // bottom left near Lake + tracks
-  [42.0450, -87.6918], // left-mid following tracks
-  [42.0568, -87.6943]  // upper-left following tracks
-];
-
-const walkingZone = L.polygon(walkingZoneCoords, {
-  color: "#4e2a84",
-  weight: 2,
-  opacity: 0.9,
-  fillColor: "#4e2a84",
-  fillOpacity: 0.28,
-  interactive: false
-}).addTo(map);
+// Create a dedicated pane for the walking zone
+map.createPane("walkingZonePane");
+map.getPane("walkingZonePane").style.zIndex = 350;
+map.getPane("walkingZonePane").style.pointerEvents = "none";
 
 L.circleMarker([NU.lat, NU.lng], {
   radius: 6,
@@ -59,6 +44,33 @@ const defaultIcon = L.icon({
   iconAnchor: [16, 42],
   popupAnchor: [0, -40]
 });
+
+// ==============================
+// WALKING ZONE OVERLAY
+// ==============================
+
+const walkingZoneCoords = [
+  [42.06435, -87.69530], // top left near Central + Ridge
+  [42.06435, -87.67215], // top right near Central + Sheridan
+  [42.05290, -87.67215], // east edge down Sheridan
+  [42.03360, -87.67215], // bottom right near Lake + Sheridan
+  [42.03360, -87.68890], // bottom left near Lake + west edge
+  [42.04480, -87.69170], // left middle along tracks
+  [42.05680, -87.69410]  // upper left along tracks
+];
+
+const walkingZone = L.polygon(walkingZoneCoords, {
+  pane: "walkingZonePane",
+  className: "walking-zone-overlay",
+  color: "#4e2a84",
+  weight: 2,
+  opacity: 0.9,
+  fillColor: "#4e2a84",
+  fillOpacity: 0.22,
+  interactive: false
+}).addTo(map);
+
+console.log("walking zone added:", walkingZone);
 
 // ==============================
 // DOM ELEMENTS
