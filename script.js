@@ -23,6 +23,29 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
 }).addTo(map);
 
+// ==============================
+// WALKING ZONE OVERLAY
+// ==============================
+
+const walkingZoneCoords = [
+  [42.0644, -87.6956], // top left near Central + Ridge
+  [42.0644, -87.6720], // top right near Central + Sheridan
+  [42.0528, -87.6720], // right side upper
+  [42.0337, -87.6720], // bottom right near Lake + Sheridan
+  [42.0337, -87.6889], // bottom left near Lake + tracks
+  [42.0450, -87.6918], // left-mid following tracks
+  [42.0568, -87.6943]  // upper-left following tracks
+];
+
+const walkingZone = L.polygon(walkingZoneCoords, {
+  color: "#4e2a84",
+  weight: 2,
+  opacity: 0.9,
+  fillColor: "#4e2a84",
+  fillOpacity: 0.28,
+  interactive: false
+}).addTo(map);
+
 L.circleMarker([NU.lat, NU.lng], {
   radius: 6,
   color: "#4e2a84",
@@ -36,29 +59,6 @@ const defaultIcon = L.icon({
   iconAnchor: [16, 42],
   popupAnchor: [0, -40]
 });
-
-// ==============================
-// WALKING ZONE OVERLAY
-// ==============================
-
-// Approximate polygon of the Northwestern walking zone
-const walkingZoneCoords = [
-  [42.0643, -87.6955], // Central St / Ridge
-  [42.0643, -87.6715], // Central St / Sheridan
-  [42.0530, -87.6715], // Sheridan mid
-  [42.0335, -87.6715], // Sheridan / Lake
-  [42.0335, -87.6895], // Lake / west side
-  [42.0450, -87.6920], // near tracks mid
-  [42.0575, -87.6940]  // upper west side
-];
-
-const walkingZone = L.polygon(walkingZoneCoords, {
-  color: "#4e2a84",       // outline
-  weight: 2,
-  fillColor: "#4e2a84",   // Northwestern purple
-  fillOpacity: 0.15,      // translucent
-  interactive: false      // markers still clickable
-}).addTo(map);
 
 // ==============================
 // DOM ELEMENTS
