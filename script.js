@@ -23,14 +23,6 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
 }).addTo(map);
 
-// Force SVG so the polygon definitely renders as an SVG path
-L.svg().addTo(map);
-
-// Create a dedicated pane for the walking zone
-map.createPane("walkingZonePane");
-map.getPane("walkingZonePane").style.zIndex = 350;
-map.getPane("walkingZonePane").style.pointerEvents = "none";
-
 L.circleMarker([NU.lat, NU.lng], {
   radius: 6,
   color: "#4e2a84",
@@ -49,28 +41,48 @@ const defaultIcon = L.icon({
 // WALKING ZONE OVERLAY
 // ==============================
 
+// very obvious debug rectangle first
+const walkingZoneDebug = L.rectangle(
+  [
+    [42.0336, -87.6955], // southwest
+    [42.0644, -87.6720]  // northeast
+  ],
+  {
+    color: "#4e2a84",
+    weight: 3,
+    opacity: 1,
+    fillColor: "#4e2a84",
+    fillOpacity: 0.18
+  }
+).addTo(map);
+
+walkingZoneDebug.bringToFront();
+
+console.log("DEBUG walking zone rectangle added");
+
+// more shaped version matching the map better
 const walkingZoneCoords = [
-  [42.06435, -87.69530], // top left near Central + Ridge
-  [42.06435, -87.67215], // top right near Central + Sheridan
-  [42.05290, -87.67215], // east edge down Sheridan
-  [42.03360, -87.67215], // bottom right near Lake + Sheridan
-  [42.03360, -87.68890], // bottom left near Lake + west edge
-  [42.04480, -87.69170], // left middle along tracks
-  [42.05680, -87.69410]  // upper left along tracks
+  [42.0644, -87.6955], // top left near Central + Ridge
+  [42.0644, -87.6720], // top right near Central + Sheridan
+  [42.0528, -87.6720], // east edge down Sheridan
+  [42.0336, -87.6720], // bottom right near Lake + Sheridan
+  [42.0336, -87.6890], // bottom left near Lake / west edge
+  [42.0450, -87.6920], // along tracks
+  [42.0568, -87.6942]  // upper west edge
 ];
 
 const walkingZone = L.polygon(walkingZoneCoords, {
-  pane: "walkingZonePane",
-  className: "walking-zone-overlay",
   color: "#4e2a84",
   weight: 2,
-  opacity: 0.9,
+  opacity: 1,
   fillColor: "#4e2a84",
-  fillOpacity: 0.22,
+  fillOpacity: 0.28,
   interactive: false
 }).addTo(map);
 
-console.log("walking zone added:", walkingZone);
+walkingZone.bringToFront();
+
+console.log("Walking zone polygon added");
 
 // ==============================
 // DOM ELEMENTS
