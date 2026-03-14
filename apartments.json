@@ -1,4 +1,4 @@
-const apartments = [
+[
   {
     "name": "Albion Evanston",
     "address": "1500 Sherman Ave, Evanston, IL 60201",
@@ -186,4 +186,4 @@ const apartments = [
     "parking": "Parking availability unclear (confirm)",
     "notes": "Modern building with central AC; parking details limited."
   }
-];
+]
