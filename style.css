@@ -47,6 +47,16 @@ body.modal-open .mapWrap::after {
   backdrop-filter: blur(8px);
 }
 
+/* ================= WALKING ZONE ================= */
+
+.leaflet-pane.walkingZonePane svg path,
+.walking-zone-overlay {
+  stroke: #4e2a84 !important;
+  stroke-width: 2px !important;
+  fill: #4e2a84 !important;
+  fill-opacity: 0.22 !important;
+}
+
 /* ================= TOPBAR ================= */
 
 .topbar {
