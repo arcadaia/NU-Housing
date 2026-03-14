@@ -38,6 +38,29 @@ const defaultIcon = L.icon({
 });
 
 // ==============================
+// WALKING ZONE OVERLAY
+// ==============================
+
+// Approximate polygon of the Northwestern walking zone
+const walkingZoneCoords = [
+  [42.0643, -87.6955], // Central St / Ridge
+  [42.0643, -87.6715], // Central St / Sheridan
+  [42.0530, -87.6715], // Sheridan mid
+  [42.0335, -87.6715], // Sheridan / Lake
+  [42.0335, -87.6895], // Lake / west side
+  [42.0450, -87.6920], // near tracks mid
+  [42.0575, -87.6940]  // upper west side
+];
+
+const walkingZone = L.polygon(walkingZoneCoords, {
+  color: "#4e2a84",       // outline
+  weight: 2,
+  fillColor: "#4e2a84",   // Northwestern purple
+  fillOpacity: 0.15,      // translucent
+  interactive: false      // markers still clickable
+}).addTo(map);
+
+// ==============================
 // DOM ELEMENTS
 // ==============================
 
