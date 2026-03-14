@@ -242,8 +242,7 @@ function openPanel(apt) {
         saveBtn.disabled = false;
         saveBtn.textContent = "Save Note";
       }
-    }
-  };
+    };
   panel.classList.remove("hidden");
 }
 
