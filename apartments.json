@@ -109,4 +109,81 @@
     "parking": "Assigned parking advertised",
     "notes": "More budget-friendly option."
   }
+  {
+    "name": "E2 Apartments",
+    "address": "1890 Maple Ave, Evanston, IL 60201",
+    "lat": 42.0555,
+    "lng": -87.6820,
+    "website": "https://e2apts.com/",
+    "one_bed_price": "~$3,140–$5,955+",
+    "ac": "Central A/C",
+    "parking": "Controlled-access garage",
+    "notes": "Garage parking with EV charging stations available."
+  },
+  {
+    "name": "Evanston Place",
+    "address": "1715 Chicago Ave, Evanston, IL 60201",
+    "lat": 42.0489,
+    "lng": -87.6790,
+    "website": "https://www.evanstonplaceapts.com/",
+    "one_bed_price": "~$2,400+ (confirm with leasing)",
+    "ac": "Central A/C",
+    "parking": "Garage + surface lot parking",
+    "notes": "Downtown building with both garage and lot parking options."
+  },
+  {
+    "name": "1717 Evanston Apartments",
+    "address": "1717 Ridge Ave, Evanston, IL 60201",
+    "lat": 42.0547,
+    "lng": -87.6828,
+    "website": "https://www.greystar.com/properties/chicago-il/1717-evanston",
+    "one_bed_price": "~$2,528+",
+    "ac": "Central A/C",
+    "parking": "Enclosed indoor heated garage",
+    "notes": "Assigned garage parking; modern downtown building."
+  },
+  {
+    "name": "Maple Grove Apartments",
+    "address": "1501 Maple Ave, Evanston, IL 60201",
+    "lat": 42.0477,
+    "lng": -87.6830,
+    "website": "https://www.maplegroveapts.com/",
+    "one_bed_price": "~$1,967–$3,202+",
+    "ac": "A/C listed",
+    "parking": "Assigned + covered parking",
+    "notes": "Parking available; EV charging not listed."
+  },
+  {
+    "name": "Main Station Apartments",
+    "address": "855 Hinman Ave, Evanston, IL 60202",
+    "lat": 42.0398,
+    "lng": -87.6759,
+    "website": "https://www.rentcafe.com/apartments/il/evanston/main-station/",
+    "one_bed_price": "~$1,510–$2,567+",
+    "ac": "A/C listed",
+    "parking": "Assigned outdoor parking",
+    "notes": "Close to Main St Metra and Purple Line."
+  },
+  {
+    "name": "The Link Evanston",
+    "address": "811 Emerson St, Evanston, IL 60201",
+    "lat": 42.0552,
+    "lng": -87.6814,
+    "website": "https://www.thelinkevanston.com/",
+    "one_bed_price": "~$1,984–$2,009+",
+    "ac": "A/C listed",
+    "parking": "Large residential parking garage",
+    "notes": "170-space garage; EV charging not confirmed."
+  },
+  {
+    "name": "Tapestry Station",
+    "address": "740 Main St, Evanston, IL 60202",
+    "lat": 42.0349,
+    "lng": -87.6781,
+    "website": "https://tapestrystation.com/",
+    "one_bed_price": "Contact leasing for pricing",
+    "ac": "Central A/C",
+    "parking": "Parking availability unclear (confirm)",
+    "notes": "Modern building with central AC; parking details limited."
+  }
 ]
