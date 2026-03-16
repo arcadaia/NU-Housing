@@ -225,7 +225,6 @@ clearListBtn.onclick = () => {
 // ==============================
 
 function openPanel(apt) {
-
   document.body.classList.add("panel-open");
 
   panelTitle.textContent = apt.name;
@@ -262,41 +261,36 @@ function openPanel(apt) {
 
   loadNotes(aptKey(apt));
 
-  document.getElementById("saveNoteBtn").onclick = () => {
-    const saveBtn = document.getElementById("saveNoteBtn");
-    const textEl = document.getElementById("newNoteText");
-    
-    saveBtn.onclick = async () => {
-      const text = textEl.value.trim();
-      if (!text) return;
-    
-      saveBtn.disabled = true;
-      saveBtn.textContent = "Saving...";
-    
-      try {
-        await db.collection("notes").add({
-          apartment: aptKey(apt),
-          text,
-          created: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    
-        textEl.value = "";
-        await loadNotes(aptKey(apt));
-      } catch (err) {
-        console.error("Save note error:", err);
-        alert("Save failed. Check console.");
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Save Note";
-      }
-    };
+  const saveBtn = document.getElementById("saveNoteBtn");
+  const textEl = document.getElementById("newNoteText");
+
+  saveBtn.onclick = async () => {
+    const text = textEl.value.trim();
+    if (!text) return;
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
+
+    try {
+      await db.collection("notes").add({
+        apartment: aptKey(apt),
+        text,
+        created: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      textEl.value = "";
+      await loadNotes(aptKey(apt));
+    } catch (err) {
+      console.error("Save note error:", err);
+      alert("Save failed. Check console.");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Save Note";
+    }
+  };
+
   panel.classList.remove("hidden");
 }
-
-panelClose.onclick = () => {
-  panel.classList.add("hidden");
-  document.body.classList.remove("panel-open");
-};
 
 function loadNotes(key) {
   const container = document.getElementById("notesContainer");
