@@ -41,46 +41,30 @@ const defaultIcon = L.icon({
 // WALKING ZONE OVERLAY
 // ==============================
 
-// very obvious debug rectangle first
-const walkingZoneDebug = L.rectangle(
-  [
-    [42.0336, -87.6955], // southwest
-    [42.0644, -87.6720]  // northeast
-  ],
-  {
-    color: "#4e2a84",
-    weight: 3,
-    opacity: 1,
-    fillColor: "#4e2a84",
-    fillOpacity: 0.18
-  }
-).addTo(map);
+// 42°03'50.6"N 87°40'37.7"W
+// 42°03'51.0"N 87°41'00.8"W
+// 42°03'06.5"N 87°41'16.3"W
+// 42°02'38.8"N 87°40'56.6"W
+// 42°02'38.5"N 87°40'23.3"W
 
-walkingZoneDebug.bringToFront();
-
-console.log("DEBUG walking zone rectangle added");
-
-// more shaped version matching the map better
 const walkingZoneCoords = [
-  [42.0644, -87.6955], // top left near Central + Ridge
-  [42.0644, -87.6720], // top right near Central + Sheridan
-  [42.0528, -87.6720], // east edge down Sheridan
-  [42.0336, -87.6720], // bottom right near Lake + Sheridan
-  [42.0336, -87.6890], // bottom left near Lake / west edge
-  [42.0450, -87.6920], // along tracks
-  [42.0568, -87.6942]  // upper west edge
+  [42.064056, -87.677139],
+  [42.064167, -87.683556],
+  [42.051806, -87.687861],
+  [42.044111, -87.682389],
+  [42.044028, -87.673139]
 ];
 
 const walkingZone = L.polygon(walkingZoneCoords, {
   color: "#4e2a84",
-  weight: 2,
+  weight: 3,
   opacity: 1,
   fillColor: "#4e2a84",
-  fillOpacity: 0.28,
+  fillOpacity: 0.18,
   interactive: false
 }).addTo(map);
 
-walkingZone.bringToFront();
+walkingZone.bringToBack();
 
 console.log("Walking zone polygon added");
 
